@@ -3,7 +3,7 @@ package gate
 import "github.com/lonng/nano/component"
 
 var (
-	// All services in master server
+	// Services in master server
 	Services = &component.Components{}
 
 	bindService = newBindService()

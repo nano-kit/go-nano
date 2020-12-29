@@ -33,7 +33,7 @@ type Logger interface {
 }
 
 func init() {
-	SetLogger(log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile))
+	SetLogger(log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile|log.Lmicroseconds))
 }
 
 var (

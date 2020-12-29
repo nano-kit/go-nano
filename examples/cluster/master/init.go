@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	// All services in master server
+	// Services in master server
 	Services = &component.Components{}
 
 	// Topic service

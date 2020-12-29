@@ -9,7 +9,7 @@ import (
 
 type BindService struct {
 	component.Base
-	nextGateUid int64
+	nextGateUID int64
 }
 
 func newBindService() *BindService {
@@ -26,11 +26,11 @@ type (
 )
 
 func (bs *BindService) Login(s *session.Session, msg *LoginRequest) error {
-	bs.nextGateUid++
-	uid := bs.nextGateUid
+	bs.nextGateUID++
+	uid := bs.nextGateUID
 	request := &protocol.NewUserRequest{
 		Nickname: msg.Nickname,
-		GateUid:  uid,
+		GateUID:  uid,
 	}
 	if err := s.RPC("TopicService.NewUser", request); err != nil {
 		return errors.Trace(err)

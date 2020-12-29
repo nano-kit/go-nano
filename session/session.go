@@ -77,7 +77,7 @@ func (s *Session) NetworkEntity() NetworkEntity {
 	return s.entity
 }
 
-// NetworkEntity returns the service router
+// Router returns the service router
 func (s *Session) Router() *Router {
 	return s.router
 }

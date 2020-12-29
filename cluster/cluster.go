@@ -135,7 +135,7 @@ func (c *cluster) Unregister(_ context.Context, req *clusterpb.UnregisterRequest
 	return resp, nil
 }
 
-func (c *cluster) setRpcClient(client *rpcClient) {
+func (c *cluster) setRPCClient(client *rpcClient) {
 	c.rpcClient = client
 }
 

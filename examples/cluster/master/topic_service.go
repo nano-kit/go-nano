@@ -13,15 +13,15 @@ import (
 type User struct {
 	session  *session.Session
 	nickname string
-	gateId   int64
-	masterId int64
+	gateID   int64
+	masterID int64
 	balance  int64
 	message  int
 }
 
 type TopicService struct {
 	component.Base
-	nextUid int64
+	nextUID int64
 	users   map[int64]*User
 }
 
@@ -36,8 +36,8 @@ type ExistsMembersResponse struct {
 }
 
 func (ts *TopicService) NewUser(s *session.Session, msg *protocol.NewUserRequest) error {
-	ts.nextUid++
-	uid := ts.nextUid
+	ts.nextUID++
+	uid := ts.nextUID
 	if err := s.Bind(uid); err != nil {
 		return errors.Trace(err)
 	}
@@ -54,16 +54,16 @@ func (ts *TopicService) NewUser(s *session.Session, msg *protocol.NewUserRequest
 	user := &User{
 		session:  s,
 		nickname: msg.Nickname,
-		gateId:   msg.GateUid,
-		masterId: uid,
+		gateID:   msg.GateUID,
+		masterID: uid,
 		balance:  1000,
 	}
 	ts.users[uid] = user
 
 	chat := &protocol.JoinRoomRequest{
 		Nickname:  msg.Nickname,
-		GateUid:   msg.GateUid,
-		MasterUid: uid,
+		GateUID:   msg.GateUID,
+		MasterUID: uid,
 	}
 	return s.RPC("RoomService.JoinRoom", chat)
 }
@@ -74,9 +74,9 @@ type UserBalanceResponse struct {
 
 func (ts *TopicService) Stats(s *session.Session, msg *protocol.MasterStats) error {
 	// It's OK to use map without lock because of this service running in main thread
-	user, found := ts.users[msg.Uid]
+	user, found := ts.users[msg.UID]
 	if !found {
-		return errors.Errorf("User not found: %v", msg.Uid)
+		return errors.Errorf("User not found: %v", msg.UID)
 	}
 	user.message++
 	user.balance--

@@ -334,11 +334,11 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 
 	// Retrieve gate address and session id
 	gateAddr := h.currentNode.ServiceAddr
-	sessionId := session.ID()
+	sessionID := session.ID()
 	switch v := session.NetworkEntity().(type) {
 	case *acceptor:
 		gateAddr = v.gateAddr
-		sessionId = v.sid
+		sessionID = v.sid
 	}
 
 	client := clusterpb.NewMemberClient(pool.Get())
@@ -346,7 +346,7 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 	case message.Request:
 		request := &clusterpb.RequestMessage{
 			GateAddr:  gateAddr,
-			SessionId: sessionId,
+			SessionId: sessionID,
 			Id:        msg.ID,
 			Route:     msg.Route,
 			Data:      data,
@@ -355,7 +355,7 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 	case message.Notify:
 		request := &clusterpb.NotifyMessage{
 			GateAddr:  gateAddr,
-			SessionId: sessionId,
+			SessionId: sessionID,
 			Route:     msg.Route,
 			Data:      data,
 		}
@@ -449,13 +449,13 @@ func (h *LocalHandler) localProcess(handler *component.Handler, lastMid uint64, 
 	if s, found := h.localServices[service]; found && s.SchedName != "" {
 		sched := session.Value(s.SchedName)
 		if sched == nil {
-			log.Println(fmt.Sprintf("nanl/handler: cannot found `schedular.LocalScheduler` by %s", s.SchedName))
+			log.Println(fmt.Sprintf("nano/handler: cannot found `schedular.LocalScheduler` by %s", s.SchedName))
 			return
 		}
 
 		local, ok := sched.(scheduler.LocalScheduler)
 		if !ok {
-			log.Println(fmt.Sprintf("nanl/handler: Type %T does not implement the `schedular.LocalScheduler` interface",
+			log.Println(fmt.Sprintf("nano/handler: Type %T does not implement the `schedular.LocalScheduler` interface",
 				sched))
 			return
 		}

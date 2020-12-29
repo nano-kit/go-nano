@@ -95,9 +95,9 @@ func (mgr *RoomManager) AfterInit() {
 		room.group.Leave(s)
 	})
 	mgr.timer = scheduler.NewTimer(time.Minute, func() {
-		for roomId, room := range mgr.rooms {
+		for roomID, room := range mgr.rooms {
 			println(fmt.Sprintf("UserCount: RoomID=%d, Time=%s, Count=%d",
-				roomId, time.Now().String(), room.group.Count()))
+				roomID, time.Now().String(), room.group.Count()))
 		}
 	})
 }

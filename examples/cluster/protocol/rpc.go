@@ -2,15 +2,15 @@ package protocol
 
 type NewUserRequest struct {
 	Nickname string `json:"nickname"`
-	GateUid  int64  `json:"gateUid"`
+	GateUID  int64  `json:"gateUid"`
 }
 
 type JoinRoomRequest struct {
 	Nickname  string `json:"nickname"`
-	GateUid   int64  `json:"gateUid"`
-	MasterUid int64  `json:"masterUid"`
+	GateUID   int64  `json:"gateUid"`
+	MasterUID int64  `json:"masterUid"`
 }
 
 type MasterStats struct {
-	Uid int64 `json:"uid"`
+	UID int64 `json:"uid"`
 }

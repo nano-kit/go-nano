@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// env represents the environment of the current process, includes
+// Package env represents the environment of the current process, includes
 // work path and config path etc.
 package env
 
@@ -40,10 +40,10 @@ var (
 	WSPath             string                   // WebSocket path(eg: ws://127.0.0.1/WSPath)
 	HandshakeValidator func([]byte) error       // When you need to verify the custom data of the handshake request
 
-	// timerPrecision indicates the precision of timer, default is time.Second
+	// TimerPrecision indicates the precision of timer, default is time.Second
 	TimerPrecision = time.Second
 
-	// globalTicker represents global ticker that all cron job will be executed
+	// GlobalTicker represents global ticker that all cron job will be executed
 	// in globalTicker.
 	GlobalTicker *time.Ticker
 
