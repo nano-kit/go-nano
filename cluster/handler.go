@@ -30,6 +30,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -287,7 +288,7 @@ func (h *LocalHandler) processPacket(agent *agent, p *packet.Packet) error {
 		// expected
 	}
 
-	agent.lastAt = time.Now().Unix()
+	atomic.StoreInt64(&agent.lastAt, time.Now().Unix())
 	return nil
 }
 
