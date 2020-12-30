@@ -43,10 +43,6 @@ var (
 	// TimerPrecision indicates the precision of timer, default is time.Second
 	TimerPrecision = time.Second
 
-	// GlobalTicker represents global ticker that all cron job will be executed
-	// in globalTicker.
-	GlobalTicker *time.Ticker
-
 	Serializer serialize.Serializer
 
 	GrpcOptions = []grpc.DialOption{grpc.WithInsecure()}

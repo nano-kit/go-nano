@@ -121,7 +121,7 @@ func (c *rpcClient) createConnPool(addr string) (*connPool, error) {
 	if !ok {
 		var err error
 		// TODO: make conn count configurable
-		array, err = newConnArray(10, addr)
+		array, err = newConnArray(1, addr)
 		if err != nil {
 			return nil, err
 		}
