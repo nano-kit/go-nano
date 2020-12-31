@@ -31,7 +31,6 @@ import (
 	"time"
 
 	"github.com/aclisp/go-nano/cluster"
-	"github.com/aclisp/go-nano/component"
 	"github.com/aclisp/go-nano/internal/env"
 	"github.com/aclisp/go-nano/internal/log"
 	"github.com/aclisp/go-nano/internal/runtime"
@@ -71,9 +70,7 @@ func Listen(addr string, opts ...Option) {
 		env.Wd, _ = filepath.Abs(wd)
 	}
 
-	opt := cluster.Options{
-		Components: &component.Components{},
-	}
+	opt := cluster.NewOptions()
 	for _, option := range opts {
 		option(&opt)
 	}

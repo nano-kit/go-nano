@@ -71,7 +71,7 @@ func WithHeartbeatInterval(d time.Duration) Option {
 // WithCheckOriginFunc sets the function that check `Origin` in http headers
 func WithCheckOriginFunc(fn func(*http.Request) bool) Option {
 	return func(opt *cluster.Options) {
-		env.CheckOrigin = fn
+		opt.CheckOrigin = fn
 	}
 }
 
@@ -90,8 +90,8 @@ func WithDictionary(dict map[string]uint16) Option {
 }
 
 func WithWSPath(path string) Option {
-	return func(_ *cluster.Options) {
-		env.WSPath = path
+	return func(opt *cluster.Options) {
+		opt.WSPath = path
 	}
 }
 
@@ -148,5 +148,11 @@ func WithLogger(l log.Logger) Option {
 func WithHandshakeValidator(fn func([]byte) error) Option {
 	return func(opt *cluster.Options) {
 		env.HandshakeValidator = fn
+	}
+}
+
+func WithHTTPHandler(pattern string, handler http.Handler) Option {
+	return func(opt *cluster.Options) {
+		opt.ServeMux.Handle(pattern, handler)
 	}
 }

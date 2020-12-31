@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -147,14 +146,12 @@ func main() {
 	pip.Outbound().PushBack(stats.outbound)
 	pip.Inbound().PushBack(stats.inbound)
 
-	log.SetFlags(log.LstdFlags | log.Llongfile)
-	http.Handle("/web/", http.StripPrefix("/web/", http.FileServer(http.Dir("web"))))
-
 	nano.Listen(":3250",
 		nano.WithIsWebsocket(true),
 		nano.WithPipeline(pip),
 		nano.WithCheckOriginFunc(func(_ *http.Request) bool { return true }),
 		nano.WithWSPath("/nano"),
+		nano.WithHTTPHandler("/web/", http.StripPrefix("/web/", http.FileServer(http.Dir("web")))),
 		nano.WithDebugMode(),
 		nano.WithSerializer(json.NewSerializer()), // override default serializer
 		nano.WithComponents(components),

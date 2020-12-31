@@ -23,7 +23,6 @@
 package env
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/aclisp/go-nano/serialize"
@@ -32,27 +31,20 @@ import (
 )
 
 var (
-	Wd                 string                   // working path
-	Die                chan bool                // wait for end application
-	Heartbeat          time.Duration            // Heartbeat internal
-	CheckOrigin        func(*http.Request) bool // check origin when websocket enabled
-	Debug              bool                     // enable Debug
-	WSPath             string                   // WebSocket path(eg: ws://127.0.0.1/WSPath)
-	HandshakeValidator func([]byte) error       // When you need to verify the custom data of the handshake request
-
-	// TimerPrecision indicates the precision of timer, default is time.Second
-	TimerPrecision = time.Second
-
-	Serializer serialize.Serializer
-
-	GrpcOptions = []grpc.DialOption{grpc.WithInsecure()}
+	Wd                 string             // working path
+	Die                chan bool          // wait for end application
+	Heartbeat          time.Duration      // Heartbeat internal
+	Debug              bool               // enable Debug
+	HandshakeValidator func([]byte) error // When you need to verify the custom data of the handshake request
+	TimerPrecision     time.Duration      // TimerPrecision indicates the precision of timer, default is time.Second
+	Serializer         serialize.Serializer
+	GrpcOptions        = []grpc.DialOption{grpc.WithInsecure()}
 )
 
 func init() {
 	Die = make(chan bool)
 	Heartbeat = 30 * time.Second
-	Debug = false
-	CheckOrigin = func(_ *http.Request) bool { return true }
+	TimerPrecision = time.Second
 	HandshakeValidator = func(_ []byte) error { return nil }
 	Serializer = protobuf.NewSerializer()
 }

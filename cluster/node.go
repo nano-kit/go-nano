@@ -32,7 +32,6 @@ import (
 
 	"github.com/aclisp/go-nano/cluster/clusterpb"
 	"github.com/aclisp/go-nano/component"
-	"github.com/aclisp/go-nano/internal/env"
 	"github.com/aclisp/go-nano/internal/log"
 	"github.com/aclisp/go-nano/internal/message"
 	"github.com/aclisp/go-nano/pipeline"
@@ -51,9 +50,27 @@ type Options struct {
 	GateAddr         string
 	Components       *component.Components
 	Label            string
-	IsWebsocket      bool
-	TSLCertificate   string
-	TSLKey           string
+
+	WebsocketOptions
+}
+
+type WebsocketOptions struct {
+	IsWebsocket    bool
+	TSLCertificate string
+	TSLKey         string
+	WSPath         string                   // WebSocket path (eg: ws://127.0.0.1/WSPath)
+	ServeMux       *http.ServeMux           // do not rely on http.DefaultServeMux, use a private mux
+	CheckOrigin    func(*http.Request) bool // check origin when websocket enabled
+}
+
+func NewOptions() Options {
+	return Options{
+		Components: &component.Components{},
+		WebsocketOptions: WebsocketOptions{
+			ServeMux:    http.NewServeMux(),
+			CheckOrigin: func(_ *http.Request) bool { return true },
+		},
+	}
 }
 
 // Node represents a node in nano cluster, which will contains a group of services.
@@ -231,7 +248,6 @@ func (n *Node) listenAndServe() {
 		log.Fatal(err.Error())
 	}
 
-	defer listener.Close()
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -244,35 +260,29 @@ func (n *Node) listenAndServe() {
 }
 
 func (n *Node) listenAndServeWS() {
-	var upgrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-		CheckOrigin:     env.CheckOrigin,
-	}
+	n.setupWSHandler()
 
-	http.HandleFunc("/"+strings.TrimPrefix(env.WSPath, "/"), func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			log.Println(fmt.Sprintf("Upgrade failure, URI=%s, Error=%s", r.RequestURI, err.Error()))
-			return
-		}
-
-		n.handler.handleWS(conn)
-	})
-
-	if err := http.ListenAndServe(n.GateAddr, nil); err != nil {
+	if err := http.ListenAndServe(n.GateAddr, n.ServeMux); err != nil {
 		log.Fatal(err.Error())
 	}
 }
 
 func (n *Node) listenAndServeWSTLS() {
+	n.setupWSHandler()
+
+	if err := http.ListenAndServeTLS(n.GateAddr, n.TSLCertificate, n.TSLKey, n.ServeMux); err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
+func (n *Node) setupWSHandler() {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
-		CheckOrigin:     env.CheckOrigin,
+		CheckOrigin:     n.CheckOrigin,
 	}
 
-	http.HandleFunc("/"+strings.TrimPrefix(env.WSPath, "/"), func(w http.ResponseWriter, r *http.Request) {
+	n.ServeMux.HandleFunc("/"+strings.TrimPrefix(n.WSPath, "/"), func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println(fmt.Sprintf("Upgrade failure, URI=%s, Error=%s", r.RequestURI, err.Error()))
@@ -281,10 +291,6 @@ func (n *Node) listenAndServeWSTLS() {
 
 		n.handler.handleWS(conn)
 	})
-
-	if err := http.ListenAndServeTLS(n.GateAddr, n.TSLCertificate, n.TSLKey, nil); err != nil {
-		log.Fatal(err.Error())
-	}
 }
 
 func (n *Node) storeSession(s *session.Session) {
