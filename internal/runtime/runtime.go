@@ -20,6 +20,6 @@
 
 package runtime
 
-import "github.com/lonng/nano/cluster"
+import "github.com/aclisp/go-nano/cluster"
 
 var CurrentNode *cluster.Node

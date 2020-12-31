@@ -1,4 +1,4 @@
-module github.com/lonng/nano
+module github.com/aclisp/go-nano
 
 go 1.14
 

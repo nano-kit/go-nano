@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/lonng/nano/cluster/clusterpb"
-	"github.com/lonng/nano/internal/log"
+	"github.com/aclisp/go-nano/cluster/clusterpb"
+	"github.com/aclisp/go-nano/internal/log"
 )
 
 // cluster represents a nano cluster, which contains a bunch of nano nodes

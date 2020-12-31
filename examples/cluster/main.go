@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/lonng/nano"
-	"github.com/lonng/nano/examples/cluster/chat"
-	"github.com/lonng/nano/examples/cluster/gate"
-	"github.com/lonng/nano/examples/cluster/master"
-	"github.com/lonng/nano/serialize/json"
-	"github.com/lonng/nano/session"
+	"github.com/aclisp/go-nano"
+	"github.com/aclisp/go-nano/examples/cluster/chat"
+	"github.com/aclisp/go-nano/examples/cluster/gate"
+	"github.com/aclisp/go-nano/examples/cluster/master"
+	"github.com/aclisp/go-nano/serialize/json"
+	"github.com/aclisp/go-nano/session"
 	"github.com/pingcap/errors"
 	"github.com/urfave/cli"
 )

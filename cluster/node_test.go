@@ -4,12 +4,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lonng/nano/benchmark/io"
-	"github.com/lonng/nano/benchmark/testdata"
-	"github.com/lonng/nano/cluster"
-	"github.com/lonng/nano/component"
-	"github.com/lonng/nano/scheduler"
-	"github.com/lonng/nano/session"
+	"github.com/aclisp/go-nano/benchmark/io"
+	"github.com/aclisp/go-nano/benchmark/testdata"
+	"github.com/aclisp/go-nano/cluster"
+	"github.com/aclisp/go-nano/component"
+	"github.com/aclisp/go-nano/scheduler"
+	"github.com/aclisp/go-nano/session"
 	. "github.com/pingcap/check"
 )
 

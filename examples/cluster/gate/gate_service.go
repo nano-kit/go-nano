@@ -1,9 +1,9 @@
 package gate
 
 import (
-	"github.com/lonng/nano/component"
-	"github.com/lonng/nano/examples/cluster/protocol"
-	"github.com/lonng/nano/session"
+	"github.com/aclisp/go-nano/component"
+	"github.com/aclisp/go-nano/examples/cluster/protocol"
+	"github.com/aclisp/go-nano/session"
 	"github.com/pingcap/errors"
 )
 
