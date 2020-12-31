@@ -65,7 +65,7 @@ type Node struct {
 
 	cluster   *cluster
 	handler   *LocalHandler
-	server    *grpc.Server
+	rpcServer *grpc.Server
 	rpcClient *rpcClient
 
 	mu       sync.RWMutex
@@ -134,19 +134,19 @@ func (n *Node) initNode() error {
 	}
 
 	// Initialize the gRPC server and register service
-	n.server = grpc.NewServer()
+	n.rpcServer = grpc.NewServer()
 	n.rpcClient = newRPCClient()
-	clusterpb.RegisterMemberServer(n.server, n)
+	clusterpb.RegisterMemberServer(n.rpcServer, n)
 
 	go func() {
-		err := n.server.Serve(listener)
+		err := n.rpcServer.Serve(listener)
 		if err != nil {
 			log.Fatalf("Start current node failed: %v", err)
 		}
 	}()
 
 	if n.IsMaster {
-		clusterpb.RegisterMasterServer(n.server, n.cluster)
+		clusterpb.RegisterMasterServer(n.rpcServer, n.cluster)
 		member := &Member{
 			isMaster: true,
 			memberInfo: &clusterpb.MemberInfo{
@@ -219,8 +219,8 @@ func (n *Node) Shutdown() {
 	}
 
 EXIT:
-	if n.server != nil {
-		n.server.GracefulStop()
+	if n.rpcServer != nil {
+		n.rpcServer.GracefulStop()
 	}
 }
 
