@@ -69,9 +69,9 @@ func (s *nodeSuite) TestNodeStartup(c *C) {
 	member1Comps.Register(&GateComponent{})
 	memberNode1 := &cluster.Node{
 		Options: cluster.Options{
-			AdvertiseAddr: "127.0.0.1:4450",
-			ClientAddr:    "127.0.0.1:14452",
-			Components:    member1Comps,
+			RegistryAddr: "127.0.0.1:4450",
+			GateAddr:     "127.0.0.1:14452",
+			Components:   member1Comps,
 		},
 		ServiceAddr: "127.0.0.1:14451",
 	}
@@ -87,8 +87,8 @@ func (s *nodeSuite) TestNodeStartup(c *C) {
 	member2Comps.Register(&GameComponent{})
 	memberNode2 := &cluster.Node{
 		Options: cluster.Options{
-			AdvertiseAddr: "127.0.0.1:4450",
-			Components:    member2Comps,
+			RegistryAddr: "127.0.0.1:4450",
+			Components:   member2Comps,
 		},
 		ServiceAddr: "127.0.0.1:24451",
 	}

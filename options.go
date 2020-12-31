@@ -22,21 +22,21 @@ func WithPipeline(pipeline pipeline.Pipeline) Option {
 	}
 }
 
-// WithAdvertiseAddr sets the advertise address option, it will be the listen address in
+// WithRegistryAddr sets the registry address option, it will be the service address of
 // master node and an advertise address which cluster member to connect
-func WithAdvertiseAddr(addr string, retryInterval ...time.Duration) Option {
+func WithRegistryAddr(addr string, regInterval ...time.Duration) Option {
 	return func(opt *cluster.Options) {
-		opt.AdvertiseAddr = addr
-		if len(retryInterval) > 0 {
-			opt.RetryInterval = retryInterval[0]
+		opt.RegistryAddr = addr
+		if len(regInterval) > 0 {
+			opt.RegisterInterval = regInterval[0]
 		}
 	}
 }
 
-// WithClientAddr sets the listen address which is used by client to establish connection.
-func WithClientAddr(addr string) Option {
+// WithGateAddr sets the listen address which is used by client to establish connection.
+func WithGateAddr(addr string) Option {
 	return func(opt *cluster.Options) {
-		opt.ClientAddr = addr
+		opt.GateAddr = addr
 	}
 }
 

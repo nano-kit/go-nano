@@ -138,8 +138,8 @@ func runGate(args *cli.Context) error {
 
 	// Startup Nano server with the specified listen address
 	nano.Listen(listen,
-		nano.WithAdvertiseAddr(masterAddr),
-		nano.WithClientAddr(gateAddr),
+		nano.WithRegistryAddr(masterAddr),
+		nano.WithGateAddr(gateAddr),
 		nano.WithComponents(gate.Services),
 		nano.WithSerializer(json.NewSerializer()),
 		nano.WithIsWebsocket(true),
@@ -169,7 +169,7 @@ func runChat(args *cli.Context) error {
 
 	// Startup Nano server with the specified listen address
 	nano.Listen(listen,
-		nano.WithAdvertiseAddr(masterAddr),
+		nano.WithRegistryAddr(masterAddr),
 		nano.WithComponents(chat.Services),
 		nano.WithSerializer(json.NewSerializer()),
 		nano.WithDebugMode(),

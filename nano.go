@@ -78,15 +78,15 @@ func Listen(addr string, opts ...Option) {
 		option(&opt)
 	}
 
-	// Use listen address as client address in non-cluster mode
-	if !opt.IsMaster && opt.AdvertiseAddr == "" && opt.ClientAddr == "" {
+	// Use listen address as gate address in non-cluster mode
+	if !opt.IsMaster && opt.RegistryAddr == "" && opt.GateAddr == "" {
 		log.Println("The current server running in singleton mode")
-		opt.ClientAddr = addr
+		opt.GateAddr = addr
 	}
 
 	// Set the retry interval to 3 secondes if doesn't set by user
-	if opt.RetryInterval == 0 {
-		opt.RetryInterval = time.Second * 3
+	if opt.RegisterInterval == 0 {
+		opt.RegisterInterval = time.Second * 3
 	}
 
 	node := &cluster.Node{
@@ -99,9 +99,9 @@ func Listen(addr string, opts ...Option) {
 	}
 	runtime.CurrentNode = node
 
-	if node.ClientAddr != "" {
-		log.Println(fmt.Sprintf("Startup *Nano gate server* %s, client address: %v, service address: %s",
-			app.name, node.ClientAddr, node.ServiceAddr))
+	if node.GateAddr != "" {
+		log.Println(fmt.Sprintf("Startup *Nano gate server* %s, gate address: %v, service address: %s",
+			app.name, node.GateAddr, node.ServiceAddr))
 	} else {
 		log.Println(fmt.Sprintf("Startup *Nano backend server* %s, service address %s",
 			app.name, node.ServiceAddr))

@@ -44,16 +44,16 @@ import (
 
 // Options contains some configurations for current node
 type Options struct {
-	Pipeline       pipeline.Pipeline
-	IsMaster       bool
-	AdvertiseAddr  string
-	RetryInterval  time.Duration
-	ClientAddr     string
-	Components     *component.Components
-	Label          string
-	IsWebsocket    bool
-	TSLCertificate string
-	TSLKey         string
+	Pipeline         pipeline.Pipeline
+	IsMaster         bool
+	RegistryAddr     string
+	RegisterInterval time.Duration
+	GateAddr         string
+	Components       *component.Components
+	Label            string
+	IsWebsocket      bool
+	TSLCertificate   string
+	TSLKey           string
 }
 
 // Node represents a node in nano cluster, which will contains a group of services.
@@ -100,7 +100,7 @@ func (n *Node) Startup() error {
 		c.Comp.AfterInit()
 	}
 
-	if n.ClientAddr != "" {
+	if n.GateAddr != "" {
 		go func() {
 			if n.IsWebsocket {
 				if len(n.TSLCertificate) != 0 {
@@ -124,7 +124,7 @@ func (n *Node) Handler() *LocalHandler {
 func (n *Node) initNode() error {
 	// Current node is not master server and does not contains master
 	// address, so running in singleton mode
-	if !n.IsMaster && n.AdvertiseAddr == "" {
+	if !n.IsMaster && n.RegistryAddr == "" {
 		return nil
 	}
 
@@ -158,7 +158,7 @@ func (n *Node) initNode() error {
 		n.cluster.members = append(n.cluster.members, member)
 		n.cluster.setRPCClient(n.rpcClient)
 	} else {
-		pool, err := n.rpcClient.getConnPool(n.AdvertiseAddr)
+		pool, err := n.rpcClient.getConnPool(n.RegistryAddr)
 		if err != nil {
 			return err
 		}
@@ -177,8 +177,8 @@ func (n *Node) initNode() error {
 				n.cluster.initMembers(resp.Members)
 				break
 			}
-			log.Println("Register current node to cluster failed", err, "and will retry in", n.RetryInterval.String())
-			time.Sleep(n.RetryInterval)
+			log.Println("Register current node to cluster failed", err, "and will retry in", n.RegisterInterval.String())
+			time.Sleep(n.RegisterInterval)
 		}
 
 	}
@@ -201,8 +201,8 @@ func (n *Node) Shutdown() {
 		components[i].Comp.Shutdown()
 	}
 
-	if !n.IsMaster && n.AdvertiseAddr != "" {
-		pool, err := n.rpcClient.getConnPool(n.AdvertiseAddr)
+	if !n.IsMaster && n.RegistryAddr != "" {
+		pool, err := n.rpcClient.getConnPool(n.RegistryAddr)
 		if err != nil {
 			log.Println("Retrieve master address error", err)
 			goto EXIT
@@ -226,7 +226,7 @@ EXIT:
 
 // Enable current server accept connection
 func (n *Node) listenAndServe() {
-	listener, err := net.Listen("tcp", n.ClientAddr)
+	listener, err := net.Listen("tcp", n.GateAddr)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -260,7 +260,7 @@ func (n *Node) listenAndServeWS() {
 		n.handler.handleWS(conn)
 	})
 
-	if err := http.ListenAndServe(n.ClientAddr, nil); err != nil {
+	if err := http.ListenAndServe(n.GateAddr, nil); err != nil {
 		log.Fatal(err.Error())
 	}
 }
@@ -282,7 +282,7 @@ func (n *Node) listenAndServeWSTLS() {
 		n.handler.handleWS(conn)
 	})
 
-	if err := http.ListenAndServeTLS(n.ClientAddr, n.TSLCertificate, n.TSLKey, nil); err != nil {
+	if err := http.ListenAndServeTLS(n.GateAddr, n.TSLCertificate, n.TSLKey, nil); err != nil {
 		log.Fatal(err.Error())
 	}
 }
