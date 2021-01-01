@@ -232,11 +232,11 @@ func SetDictionary(dict map[string]uint16) {
 
 		// duplication check
 		if _, ok := routes[r]; ok {
-			log.Println(fmt.Sprintf("duplicated route(route: %s, code: %d)", r, code))
+			log.Printf("duplicated route(route: %s, code: %d)", r, code)
 		}
 
 		if _, ok := codes[code]; ok {
-			log.Println(fmt.Sprintf("duplicated route(route: %s, code: %d)", r, code))
+			log.Printf("duplicated route(route: %s, code: %d)", r, code)
 		}
 
 		// update map, using last value when key duplicated

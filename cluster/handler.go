@@ -112,7 +112,7 @@ func (h *LocalHandler) register(comp component.Component, opts []component.Optio
 	h.localServices[s.Name] = s
 	for name, handler := range s.Handlers {
 		n := fmt.Sprintf("%s.%s", s.Name, name)
-		log.Println("Register local handler", n)
+		log.Print("Register local handler", n)
 		h.localHandlers[n] = handler
 	}
 	return nil
@@ -129,7 +129,7 @@ func (h *LocalHandler) addRemoteService(member *clusterpb.MemberInfo) {
 	defer h.mu.Unlock()
 
 	for _, s := range member.Services {
-		log.Println("Register remote service", s)
+		log.Print("Register remote service", s)
 		h.remoteServices[s] = append(h.remoteServices[s], member)
 	}
 }
@@ -186,7 +186,7 @@ func (h *LocalHandler) handle(conn net.Conn) {
 	go agent.write()
 
 	if env.Debug {
-		log.Println(fmt.Sprintf("New session established: %s", agent.String()))
+		log.Printf("New session established: %s", agent.String())
 	}
 
 	// guarantee agent related resource be destroyed
@@ -197,26 +197,26 @@ func (h *LocalHandler) handle(conn net.Conn) {
 
 		members := h.currentNode.cluster.remoteAddrs()
 		for _, remote := range members {
-			log.Println("Notify remote server success", remote)
+			log.Print("Notify remote server success", remote)
 			pool, err := h.currentNode.rpcClient.getConnPool(remote)
 			if err != nil {
-				log.Println("Cannot retrieve connection pool for address", remote, err)
+				log.Print("Cannot retrieve connection pool for address", remote, err)
 				continue
 			}
 			client := clusterpb.NewMemberClient(pool.Get())
 			_, err = client.SessionClosed(context.Background(), request)
 			if err != nil {
-				log.Println("Cannot closed session in remote address", remote, err)
+				log.Print("Cannot closed session in remote address", remote, err)
 				continue
 			}
 			if env.Debug {
-				log.Println("Notify remote server success", remote)
+				log.Print("Notify remote server success", remote)
 			}
 		}
 
 		agent.Close()
 		if env.Debug {
-			log.Println(fmt.Sprintf("Session read goroutine exit, SessionID=%d, UID=%d", agent.session.ID(), agent.session.UID()))
+			log.Printf("Session read goroutine exit, SessionID=%d, UID=%d", agent.session.ID(), agent.session.UID())
 		}
 	}()
 
@@ -225,14 +225,14 @@ func (h *LocalHandler) handle(conn net.Conn) {
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
-			log.Println(fmt.Sprintf("Read message error: %s, session will be closed immediately", err.Error()))
+			log.Printf("Read message error: %s, session will be closed immediately", err.Error())
 			return
 		}
 
 		// TODO(warning): decoder use slice for performance, packet data should be copy before next Decode
 		packets, err := agent.decoder.Decode(buf[:n])
 		if err != nil {
-			log.Println(err.Error())
+			log.Print(err.Error())
 			return
 		}
 
@@ -243,7 +243,7 @@ func (h *LocalHandler) handle(conn net.Conn) {
 		// process all packet
 		for i := range packets {
 			if err := h.processPacket(agent, packets[i]); err != nil {
-				log.Println(err.Error())
+				log.Print(err.Error())
 				return
 			}
 		}
@@ -263,13 +263,13 @@ func (h *LocalHandler) processPacket(agent *agent, p *packet.Packet) error {
 
 		agent.setStatus(statusHandshake)
 		if env.Debug {
-			log.Println(fmt.Sprintf("Session handshake Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr()))
+			log.Printf("Session handshake Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr())
 		}
 
 	case packet.HandshakeAck:
 		agent.setStatus(statusWorking)
 		if env.Debug {
-			log.Println(fmt.Sprintf("Receive handshake ACK Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr()))
+			log.Printf("Receive handshake ACK Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr())
 		}
 
 	case packet.Data:
@@ -301,14 +301,14 @@ func (h *LocalHandler) findMembers(service string) []*clusterpb.MemberInfo {
 func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Message, noCopy bool) {
 	index := strings.LastIndex(msg.Route, ".")
 	if index < 0 {
-		log.Println(fmt.Sprintf("nano/handler: invalid route %s", msg.Route))
+		log.Printf("nano/handler: invalid route %s", msg.Route)
 		return
 	}
 
 	service := msg.Route[:index]
 	members := h.findMembers(service)
 	if len(members) == 0 {
-		log.Println(fmt.Sprintf("nano/handler: %s not found(forgot registered?)", msg.Route))
+		log.Printf("nano/handler: %s not found(forgot registered?)", msg.Route)
 		return
 	}
 
@@ -324,7 +324,7 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 	}
 	pool, err := h.currentNode.rpcClient.getConnPool(remoteAddr)
 	if err != nil {
-		log.Println(err)
+		log.Print(err)
 		return
 	}
 	var data = msg.Data
@@ -363,7 +363,7 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 		_, err = client.HandleNotify(context.Background(), request)
 	}
 	if err != nil {
-		log.Println(fmt.Sprintf("Process remote message (%d:%s) error: %+v", msg.ID, msg.Route, err))
+		log.Printf("Process remote message (%d:%s) error: %+v", msg.ID, msg.Route, err)
 	}
 }
 
@@ -375,7 +375,7 @@ func (h *LocalHandler) processMessage(agent *agent, msg *message.Message) {
 	case message.Notify:
 		lastMid = 0
 	default:
-		log.Println("Invalid message type: " + msg.Type.String())
+		log.Print("Invalid message type: " + msg.Type.String())
 		return
 	}
 
@@ -390,7 +390,7 @@ func (h *LocalHandler) processMessage(agent *agent, msg *message.Message) {
 func (h *LocalHandler) handleWS(conn *websocket.Conn) {
 	c, err := newWSConn(conn)
 	if err != nil {
-		log.Println(err)
+		log.Print(err)
 		return
 	}
 	go h.handle(c)
@@ -400,7 +400,7 @@ func (h *LocalHandler) localProcess(handler *component.Handler, lastMid uint64, 
 	if pipe := h.pipeline; pipe != nil {
 		err := pipe.Inbound().Process(session, msg)
 		if err != nil {
-			log.Println("Pipeline process failed: " + err.Error())
+			log.Print("Pipeline process failed: " + err.Error())
 			return
 		}
 	}
@@ -413,13 +413,13 @@ func (h *LocalHandler) localProcess(handler *component.Handler, lastMid uint64, 
 		data = reflect.New(handler.Type.Elem()).Interface()
 		err := env.Serializer.Unmarshal(payload, data)
 		if err != nil {
-			log.Println(fmt.Sprintf("Deserialize to %T failed: %+v (%v)", data, err, payload))
+			log.Printf("Deserialize to %T failed: %+v (%v)", data, err, payload)
 			return
 		}
 	}
 
 	if env.Debug {
-		log.Println(fmt.Sprintf("UID=%d, Message={%s}, Data=%+v", session.UID(), msg.String(), data))
+		log.Printf("UID=%d, Message={%s}, Data=%+v", session.UID(), msg.String(), data)
 	}
 
 	args := []reflect.Value{handler.Receiver, reflect.ValueOf(session), reflect.ValueOf(data)}
@@ -434,14 +434,14 @@ func (h *LocalHandler) localProcess(handler *component.Handler, lastMid uint64, 
 		result := handler.Method.Func.Call(args)
 		if len(result) > 0 {
 			if err := result[0].Interface(); err != nil {
-				log.Println(fmt.Sprintf("Service %s error: %+v", msg.Route, err))
+				log.Printf("Service %s error: %+v", msg.Route, err)
 			}
 		}
 	}
 
 	index := strings.LastIndex(msg.Route, ".")
 	if index < 0 {
-		log.Println(fmt.Sprintf("nano/handler: invalid route %s", msg.Route))
+		log.Printf("nano/handler: invalid route %s", msg.Route)
 		return
 	}
 
@@ -450,14 +450,14 @@ func (h *LocalHandler) localProcess(handler *component.Handler, lastMid uint64, 
 	if s, found := h.localServices[service]; found && s.SchedName != "" {
 		sched := session.Value(s.SchedName)
 		if sched == nil {
-			log.Println(fmt.Sprintf("nano/handler: cannot found `schedular.LocalScheduler` by %s", s.SchedName))
+			log.Printf("nano/handler: cannot found `schedular.LocalScheduler` by %s", s.SchedName)
 			return
 		}
 
 		local, ok := sched.(scheduler.LocalScheduler)
 		if !ok {
-			log.Println(fmt.Sprintf("nano/handler: Type %T does not implement the `schedular.LocalScheduler` interface",
-				sched))
+			log.Printf("nano/handler: Type %T does not implement the `schedular.LocalScheduler` interface",
+				sched)
 			return
 		}
 		local.Schedule(task)

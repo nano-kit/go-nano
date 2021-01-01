@@ -50,6 +50,7 @@ type Options struct {
 	GateAddr         string
 	Components       *component.Components
 	Label            string
+	MonitorAddr      string
 
 	WebsocketOptions
 }
@@ -89,10 +90,30 @@ type Node struct {
 	sessions map[int64]*session.Session
 }
 
-func (n *Node) Startup() error {
-	if n.ServiceAddr == "" {
-		return errors.New("service address cannot be empty in master node")
+func validateListenAddrWithExplicitPort(addr string) error {
+	if addr == "" {
+		return errors.New("address cannot be empty")
 	}
+
+	if _, port, err := net.SplitHostPort(addr); err != nil {
+		return err
+	} else if port == "" || port == "0" {
+		return errors.New("port number cannot be automatically chosen")
+	}
+
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+	listener.Close()
+	return nil
+}
+
+func (n *Node) Startup() error {
+	if err := validateListenAddrWithExplicitPort(n.ServiceAddr); err != nil {
+		return fmt.Errorf("invalid node service address: %v", err)
+	}
+
 	n.sessions = map[int64]*session.Session{}
 	n.cluster = newCluster(n)
 	n.handler = NewHandler(n, n.Pipeline)
@@ -129,9 +150,26 @@ func (n *Node) Startup() error {
 				n.listenAndServe()
 			}
 		}()
+		n.waitForGate(time.Second)
 	}
 
+	n.startMonitor()
 	return nil
+}
+
+func (n *Node) waitForGate(timeout time.Duration) {
+	begin := time.Now()
+	for time.Now().Sub(begin) < timeout {
+		if conn, err := net.Dial("tcp", n.GateAddr); err != nil {
+			if strings.Contains(err.Error(), "connection refused") {
+				time.Sleep(10 * time.Millisecond)
+				continue
+			}
+		} else {
+			conn.Close()
+		}
+		break
+	}
 }
 
 func (n *Node) Handler() *LocalHandler {
@@ -194,7 +232,7 @@ func (n *Node) initNode() error {
 				n.cluster.initMembers(resp.Members)
 				break
 			}
-			log.Println("Register current node to cluster failed", err, "and will retry in", n.RegisterInterval.String())
+			log.Print("Register current node to cluster failed", err, "and will retry in", n.RegisterInterval.String())
 			time.Sleep(n.RegisterInterval)
 		}
 
@@ -221,7 +259,7 @@ func (n *Node) Shutdown() {
 	if !n.IsMaster && n.RegistryAddr != "" {
 		pool, err := n.rpcClient.getConnPool(n.RegistryAddr)
 		if err != nil {
-			log.Println("Retrieve master address error", err)
+			log.Print("Retrieve master address error", err)
 			goto EXIT
 		}
 		client := clusterpb.NewMasterClient(pool.Get())
@@ -230,7 +268,7 @@ func (n *Node) Shutdown() {
 		}
 		_, err = client.Unregister(context.Background(), request)
 		if err != nil {
-			log.Println("Unregister current node failed", err)
+			log.Print("Unregister current node failed", err)
 			goto EXIT
 		}
 	}
@@ -251,7 +289,7 @@ func (n *Node) listenAndServe() {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Println(err.Error())
+			log.Print(err.Error())
 			continue
 		}
 
@@ -285,7 +323,7 @@ func (n *Node) setupWSHandler() {
 	n.ServeMux.HandleFunc("/"+strings.TrimPrefix(n.WSPath, "/"), func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Println(fmt.Sprintf("Upgrade failure, URI=%s, Error=%s", r.RequestURI, err.Error()))
+			log.Printf("Upgrade failure, URI=%s, Error=%s", r.RequestURI, err.Error())
 			return
 		}
 

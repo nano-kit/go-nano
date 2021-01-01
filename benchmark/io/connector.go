@@ -217,7 +217,7 @@ func (c *Connector) write() {
 		select {
 		case data := <-c.chSend:
 			if _, err := c.conn.Write(data); err != nil {
-				log.Println(err.Error())
+				log.Print(err.Error())
 				c.Close()
 			}
 
@@ -237,14 +237,14 @@ func (c *Connector) read() {
 	for {
 		n, err := c.conn.Read(buf)
 		if err != nil {
-			log.Println(err.Error())
+			log.Print(err.Error())
 			c.Close()
 			return
 		}
 
 		packets, err := c.codec.Decode(buf[:n])
 		if err != nil {
-			log.Println(err.Error())
+			log.Print(err.Error())
 			c.Close()
 			return
 		}
@@ -264,7 +264,7 @@ func (c *Connector) processPacket(p *packet.Packet) {
 	case packet.Data:
 		msg, err := message.Decode(p.Data)
 		if err != nil {
-			log.Println(err.Error())
+			log.Print(err.Error())
 			return
 		}
 		c.processMessage(msg)
@@ -279,7 +279,7 @@ func (c *Connector) processMessage(msg *message.Message) {
 	case message.Push:
 		cb, ok := c.eventHandler(msg.Route)
 		if !ok {
-			log.Println("event handler not found", msg.Route)
+			log.Print("event handler not found", msg.Route)
 			return
 		}
 
@@ -288,7 +288,7 @@ func (c *Connector) processMessage(msg *message.Message) {
 	case message.Response:
 		cb, ok := c.responseHandler(msg.ID)
 		if !ok {
-			log.Println("response handler not found", msg.ID)
+			log.Print("response handler not found", msg.ID)
 			return
 		}
 

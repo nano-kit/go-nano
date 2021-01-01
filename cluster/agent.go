@@ -125,11 +125,11 @@ func (a *agent) Push(route string, v interface{}) error {
 	if env.Debug {
 		switch d := v.(type) {
 		case []byte:
-			log.Println(fmt.Sprintf("Type=Push, ID=%d, UID=%d, Route=%s, Data=%dbytes",
-				a.session.ID(), a.session.UID(), route, len(d)))
+			log.Printf("Type=Push, ID=%d, UID=%d, Route=%s, Data=%dbytes",
+				a.session.ID(), a.session.UID(), route, len(d))
 		default:
-			log.Println(fmt.Sprintf("Type=Push, ID=%d, UID=%d, Route=%s, Data=%+v",
-				a.session.ID(), a.session.UID(), route, v))
+			log.Printf("Type=Push, ID=%d, UID=%d, Route=%s, Data=%+v",
+				a.session.ID(), a.session.UID(), route, v)
 		}
 	}
 
@@ -180,11 +180,11 @@ func (a *agent) ResponseMid(mid uint64, v interface{}) error {
 	if env.Debug {
 		switch d := v.(type) {
 		case []byte:
-			log.Println(fmt.Sprintf("Type=Response, ID=%d, UID=%d, MID=%d, Data=%dbytes",
-				a.session.ID(), a.session.UID(), mid, len(d)))
+			log.Printf("Type=Response, ID=%d, UID=%d, MID=%d, Data=%dbytes",
+				a.session.ID(), a.session.UID(), mid, len(d))
 		default:
-			log.Println(fmt.Sprintf("Type=Response, ID=%d, UID=%d, MID=%d, Data=%+v",
-				a.session.ID(), a.session.UID(), mid, v))
+			log.Printf("Type=Response, ID=%d, UID=%d, MID=%d, Data=%+v",
+				a.session.ID(), a.session.UID(), mid, v)
 		}
 	}
 
@@ -201,8 +201,8 @@ func (a *agent) Close() error {
 	a.setStatus(statusClosed)
 
 	if env.Debug {
-		log.Println(fmt.Sprintf("Session closed, ID=%d, UID=%d, IP=%s",
-			a.session.ID(), a.session.UID(), a.conn.RemoteAddr()))
+		log.Printf("Session closed, ID=%d, UID=%d, IP=%s",
+			a.session.ID(), a.session.UID(), a.conn.RemoteAddr())
 	}
 
 	// prevent closing closed channel
@@ -246,7 +246,7 @@ func (a *agent) write() {
 		close(chWrite)
 		a.Close()
 		if env.Debug {
-			log.Println(fmt.Sprintf("Session write goroutine exit, SessionID=%d, UID=%d", a.session.ID(), a.session.UID()))
+			log.Printf("Session write goroutine exit, SessionID=%d, UID=%d", a.session.ID(), a.session.UID())
 		}
 	}()
 
@@ -255,7 +255,7 @@ func (a *agent) write() {
 		case <-ticker.C:
 			deadline := time.Now().Add(-2 * env.Heartbeat).Unix()
 			if atomic.LoadInt64(&a.lastAt) < deadline {
-				log.Println(fmt.Sprintf("Session heartbeat timeout, LastTime=%d, Deadline=%d", atomic.LoadInt64(&a.lastAt), deadline))
+				log.Printf("Session heartbeat timeout, LastTime=%d, Deadline=%d", atomic.LoadInt64(&a.lastAt), deadline)
 				return
 			}
 			chWrite <- hbd
@@ -263,7 +263,7 @@ func (a *agent) write() {
 		case data := <-chWrite:
 			// close agent while low-level conn broken
 			if _, err := a.conn.Write(data); err != nil {
-				log.Println(err.Error())
+				log.Print(err.Error())
 				return
 			}
 
@@ -272,9 +272,9 @@ func (a *agent) write() {
 			if err != nil {
 				switch data.typ {
 				case message.Push:
-					log.Println(fmt.Sprintf("Push: %s error: %s", data.route, err.Error()))
+					log.Printf("Push: %s error: %s", data.route, err.Error())
 				case message.Response:
-					log.Println(fmt.Sprintf("Response message(id: %d) error: %s", data.mid, err.Error()))
+					log.Printf("Response message(id: %d) error: %s", data.mid, err.Error())
 				default:
 					// expect
 				}
@@ -291,21 +291,21 @@ func (a *agent) write() {
 			if pipe := a.pipeline; pipe != nil {
 				err := pipe.Outbound().Process(a.session, m)
 				if err != nil {
-					log.Println("broken pipeline", err.Error())
+					log.Print("broken pipeline", err.Error())
 					break
 				}
 			}
 
 			em, err := m.Encode()
 			if err != nil {
-				log.Println(err.Error())
+				log.Print(err.Error())
 				break
 			}
 
 			// packet encode
 			p, err := codec.Encode(packet.Data, em)
 			if err != nil {
-				log.Println(err)
+				log.Print(err)
 				break
 			}
 			chWrite <- p

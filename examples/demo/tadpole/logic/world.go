@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/aclisp/go-nano"
@@ -29,14 +28,14 @@ func (w *World) Init() {
 	session.Lifetime.OnClosed(func(s *session.Session) {
 		w.Leave(s)
 		w.Broadcast("leave", &protocol.LeaveWorldResponse{ID: s.ID()})
-		log.Println(fmt.Sprintf("session count: %d", w.Count()))
+		log.Printf("session count: %d", w.Count())
 	})
 }
 
 // Enter was called when new guest enter
 func (w *World) Enter(s *session.Session, msg []byte) error {
 	w.Add(s)
-	log.Println(fmt.Sprintf("session count: %d", w.Count()))
+	log.Printf("session count: %d", w.Count())
 	return s.Response(&protocol.EnterWorldResponse{ID: s.ID()})
 }
 

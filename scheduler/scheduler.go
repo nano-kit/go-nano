@@ -21,7 +21,6 @@
 package scheduler
 
 import (
-	"fmt"
 	"runtime/debug"
 	"sync/atomic"
 	"time"
@@ -55,7 +54,7 @@ var (
 func try(f func()) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(fmt.Sprintf("Handle message panic: %+v\n%s", err, debug.Stack()))
+			log.Printf("Handle message panic: %+v\n%s", err, debug.Stack())
 		}
 	}()
 	f()
@@ -92,7 +91,7 @@ func Close() {
 	}
 	close(chDie)
 	<-chExit
-	log.Println("Scheduler stopped")
+	log.Print("Scheduler stopped")
 }
 
 func PushTask(task Task) {

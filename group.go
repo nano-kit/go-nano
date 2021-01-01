@@ -21,7 +21,6 @@
 package nano
 
 import (
-	"fmt"
 	"sync"
 	"sync/atomic"
 
@@ -97,7 +96,7 @@ func (c *Group) Multicast(route string, v interface{}, filter SessionFilter) err
 	}
 
 	if env.Debug {
-		log.Println(fmt.Sprintf("Multicast %s, Data=%+v", route, v))
+		log.Printf("Multicast %s, Data=%+v", route, v)
 	}
 
 	c.mu.RLock()
@@ -108,7 +107,7 @@ func (c *Group) Multicast(route string, v interface{}, filter SessionFilter) err
 			continue
 		}
 		if err = s.Push(route, data); err != nil {
-			log.Println(err.Error())
+			log.Print(err.Error())
 		}
 	}
 
@@ -127,7 +126,7 @@ func (c *Group) Broadcast(route string, v interface{}) error {
 	}
 
 	if env.Debug {
-		log.Println(fmt.Sprintf("Broadcast %s, Data=%+v", route, v))
+		log.Printf("Broadcast %s, Data=%+v", route, v)
 	}
 
 	c.mu.RLock()
@@ -135,7 +134,7 @@ func (c *Group) Broadcast(route string, v interface{}) error {
 
 	for _, s := range c.sessions {
 		if err = s.Push(route, data); err != nil {
-			log.Println(fmt.Sprintf("Session push message error, ID=%d, UID=%d, Error=%s", s.ID(), s.UID(), err.Error()))
+			log.Printf("Session push message error, ID=%d, UID=%d, Error=%s", s.ID(), s.UID(), err.Error())
 		}
 	}
 
@@ -155,7 +154,7 @@ func (c *Group) Add(session *session.Session) error {
 	}
 
 	if env.Debug {
-		log.Println(fmt.Sprintf("Add session to group %s, ID=%d, UID=%d", c.name, session.ID(), session.UID()))
+		log.Printf("Add session to group %s, ID=%d, UID=%d", c.name, session.ID(), session.UID())
 	}
 
 	c.mu.Lock()
@@ -178,7 +177,7 @@ func (c *Group) Leave(s *session.Session) error {
 	}
 
 	if env.Debug {
-		log.Println(fmt.Sprintf("Remove session from group %s, UID=%d", c.name, s.UID()))
+		log.Printf("Remove session from group %s, UID=%d", c.name, s.UID())
 	}
 
 	c.mu.Lock()
