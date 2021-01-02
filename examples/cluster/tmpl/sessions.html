@@ -1,0 +1,23 @@
+{{define "sessions"}}
+<h2>User Sessions:</h2>
+<table>
+    <thead><tr>
+        <th>SessionID</th>
+        <th>UserID</th>
+        <th>LastHeartbeat</th>
+        <th>RemoteAddr</th>
+        <th>LastMessageID</th>
+    </tr></thead>
+    <tbody>
+    {{range .}}
+    <tr>
+        <td>{{.ID}}</td>
+        <td>{{.UID}}</td>
+        <td>{{.LastTime}}</td>
+        <td>{{.RemoteAddr}}</td>
+        <td>{{.LastMid}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+{{end}}

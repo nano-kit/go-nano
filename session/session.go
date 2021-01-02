@@ -113,6 +113,12 @@ func (s *Session) UID() int64 {
 	return atomic.LoadInt64(&s.uid)
 }
 
+// LastTime returns last heartbeat time in readable format
+func (s *Session) LastTime() string {
+	t := atomic.LoadInt64(&s.lastTime)
+	return time.Unix(t, 0).In(time.Local).Format(time.RFC822Z)
+}
+
 // LastMid returns the last message id
 func (s *Session) LastMid() uint64 {
 	return s.entity.LastMid()

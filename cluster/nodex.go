@@ -26,9 +26,11 @@ import (
 	"net"
 	"net/http"
 	"net/http/pprof"
+	"sort"
 	"strconv"
 
 	"github.com/aclisp/go-nano/internal/log"
+	"github.com/aclisp/go-nano/session"
 )
 
 func (n *Node) startMonitor() {
@@ -68,6 +70,20 @@ func (n *Node) Members() []*Member {
 	n.cluster.mu.RLock()
 	defer n.cluster.mu.RUnlock()
 	return n.cluster.members
+}
+
+func (n *Node) Sessions() []*session.Session {
+	n.mu.RLock()
+	var result = make([]*session.Session, 0, len(n.sessions))
+	for _, s := range n.sessions {
+		result = append(result, s)
+	}
+	n.mu.RUnlock()
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].ID() < result[j].ID()
+	})
+	return result
 }
 
 func determineMonitorAddr(serviceAddr string) (monitorAddr string) {
