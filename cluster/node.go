@@ -191,6 +191,7 @@ func (n *Node) initNode() error {
 	// Initialize the gRPC server and register service
 	n.rpcServer = grpc.NewServer()
 	n.rpcClient = newRPCClient()
+	scheduler.NewTimer(time.Minute, n.shrinkRPCClient)
 	clusterpb.RegisterMemberServer(n.rpcServer, n)
 
 	go func() {
@@ -334,6 +335,12 @@ func (n *Node) setupWSHandler() {
 func (n *Node) storeSession(s *session.Session) {
 	n.mu.Lock()
 	n.sessions[s.ID()] = s
+	n.mu.Unlock()
+}
+
+func (n *Node) removeSession(s *session.Session) {
+	n.mu.Lock()
+	delete(n.sessions, s.ID())
 	n.mu.Unlock()
 }
 

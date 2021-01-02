@@ -245,7 +245,6 @@ func (h *LocalHandler) handle(conn net.Conn) {
 
 		members := h.currentNode.cluster.remoteAddrs()
 		for _, remote := range members {
-			log.Print("Notify remote server success", remote)
 			pool, err := h.currentNode.rpcClient.getConnPool(remote)
 			if err != nil {
 				log.Print("Cannot retrieve connection pool for address", remote, err)
@@ -262,6 +261,7 @@ func (h *LocalHandler) handle(conn net.Conn) {
 			}
 		}
 
+		h.currentNode.removeSession(agent.session)
 		agent.Close()
 		if env.Debug {
 			log.Printf("Session read goroutine exit, SessionID=%d, UID=%d", agent.session.ID(), agent.session.UID())

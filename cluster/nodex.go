@@ -101,6 +101,10 @@ func determineMonitorAddr(serviceAddr string) (monitorAddr string) {
 	return ""
 }
 
+func (n *Node) shrinkRPCClient() {
+	n.rpcClient.shrinkTo(n.cluster.remoteAddrs())
+}
+
 func (n *Node) nodeInfo(w http.ResponseWriter, r *http.Request) {
 	const tmplPath = "./tmpl/"
 	nodeTmpl, err := template.ParseFiles(

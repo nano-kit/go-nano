@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/aclisp/go-nano/internal/env"
+	"github.com/aclisp/go-nano/internal/log"
 	"google.golang.org/grpc"
 )
 
@@ -130,14 +131,40 @@ func (c *rpcClient) createConnPool(addr string) (*connPool, error) {
 	return array, nil
 }
 
-func (c *rpcClient) closePool() {
+func (c *rpcClient) closePool(addr string) {
 	c.Lock()
-	if !c.isClosed {
-		c.isClosed = true
-		// close all connections
-		for _, array := range c.pools {
-			array.Close()
+	pool := c.pools[addr]
+	delete(c.pools, addr)
+	c.Unlock()
+
+	for _, conn := range pool.v {
+		conn.Close()
+	}
+}
+
+func (c *rpcClient) shrinkTo(addrs []string) {
+	c.RLock()
+	currs := make([]string, 0, len(c.pools))
+	for addr := range c.pools {
+		currs = append(currs, addr)
+	}
+	c.RUnlock()
+
+	contains := func(s []string, e string) bool {
+		for _, a := range s {
+			if a == e {
+				return true
+			}
+		}
+		return false
+	}
+
+	for _, curr := range currs {
+		if !contains(addrs, curr) {
+			c.closePool(curr)
+			if env.Debug {
+				log.Print("Close rpc client to", curr)
+			}
 		}
 	}
-	c.Unlock()
 }
