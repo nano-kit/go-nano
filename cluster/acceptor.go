@@ -6,7 +6,6 @@ import (
 
 	"github.com/aclisp/go-nano/cluster/clusterpb"
 	"github.com/aclisp/go-nano/internal/message"
-	"github.com/aclisp/go-nano/mock"
 	"github.com/aclisp/go-nano/session"
 )
 
@@ -88,6 +87,15 @@ func (a *acceptor) Close() error {
 }
 
 // RemoteAddr implements the session.NetworkEntity interface
-func (*acceptor) RemoteAddr() net.Addr {
-	return mock.NetAddr{}
+func (a *acceptor) RemoteAddr() net.Addr {
+	return acceptorRemoteAddr{network: "grpc", address: a.gateAddr}
 }
+
+type acceptorRemoteAddr struct {
+	network string
+	address string
+}
+
+func (a acceptorRemoteAddr) Network() string { return a.network }
+
+func (a acceptorRemoteAddr) String() string { return a.address }

@@ -86,5 +86,5 @@ func (ts *TopicService) Stats(s *session.Session, msg *protocol.MasterStats) err
 func (ts *TopicService) userDisconnected(s *session.Session) {
 	uid := s.UID()
 	delete(ts.users, uid)
-	log.Print("User session disconnected", s.UID())
+	log.Println("User session disconnected", s.UID())
 }

@@ -28,7 +28,9 @@ import (
 	"net/http/pprof"
 	"sort"
 	"strconv"
+	"time"
 
+	"github.com/aclisp/go-nano/internal/env"
 	"github.com/aclisp/go-nano/internal/log"
 	"github.com/aclisp/go-nano/session"
 )
@@ -86,6 +88,23 @@ func (n *Node) Sessions() []*session.Session {
 	return result
 }
 
+// Type shows the node type: "Standalone" "Hub" "Gate" "Backend"
+func (n *Node) Type() string {
+	if !n.IsMaster && n.RegistryAddr == "" {
+		return "Standalone"
+	}
+
+	if n.IsMaster {
+		return "Hub"
+	}
+
+	if n.GateAddr != "" {
+		return "Gate"
+	}
+
+	return "Backend"
+}
+
 func determineMonitorAddr(serviceAddr string) (monitorAddr string) {
 	// ignore err here because serviceAddr should be validated
 	host, port, _ := net.SplitHostPort(serviceAddr)
@@ -105,6 +124,22 @@ func (n *Node) shrinkRPCClient() {
 	n.rpcClient.shrinkTo(n.cluster.remoteAddrs())
 }
 
+func (n *Node) removeStaleSession() {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+
+	deadline := time.Now().Add(-2 * time.Hour)
+	for id, session := range n.sessions {
+		if session.LastTime().Before(deadline) {
+			if env.Debug {
+				log.Printf("Close stale session ID=%d, UID=%d", session.ID(), session.UID())
+			}
+			delete(n.sessions, id)
+			session.Close()
+		}
+	}
+}
+
 func (n *Node) nodeInfo(w http.ResponseWriter, r *http.Request) {
 	const tmplPath = "./tmpl/"
 	nodeTmpl, err := template.ParseFiles(
@@ -113,7 +148,6 @@ func (n *Node) nodeInfo(w http.ResponseWriter, r *http.Request) {
 		tmplPath+"remotes.html",
 		tmplPath+"members.html",
 		tmplPath+"sessions.html",
-		tmplPath+"mesh.html",
 	)
 	if err != nil {
 		log.Print(err)

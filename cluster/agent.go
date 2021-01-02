@@ -21,13 +21,14 @@
 package cluster
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
-	"reflect"
 	"sync/atomic"
 	"time"
 
+	"github.com/aclisp/go-nano/cluster/clusterpb"
 	"github.com/aclisp/go-nano/internal/codec"
 	"github.com/aclisp/go-nano/internal/env"
 	"github.com/aclisp/go-nano/internal/log"
@@ -65,7 +66,6 @@ type (
 		pipeline pipeline.Pipeline
 
 		rpcHandler rpcHandler
-		srv        reflect.Value // cached session reflect.Value
 	}
 
 	pendingMessage struct {
@@ -92,7 +92,6 @@ func newAgent(conn net.Conn, pipeline pipeline.Pipeline, rpcHandler rpcHandler) 
 	// binding session
 	s := session.New(a)
 	a.session = s
-	a.srv = reflect.ValueOf(s)
 
 	return a
 }
@@ -208,7 +207,6 @@ func (a *agent) Close() error {
 	// prevent closing closed channel
 	select {
 	case <-a.chDie:
-		// expect
 	default:
 		close(a.chDie)
 		scheduler.PushTask(func() { session.Lifetime.Close(a.session) })
@@ -275,8 +273,6 @@ func (a *agent) write() {
 					log.Printf("Push: %s error: %s", data.route, err.Error())
 				case message.Response:
 					log.Printf("Response message(id: %d) error: %s", data.mid, err.Error())
-				default:
-					// expect
 				}
 				break
 			}
@@ -315,6 +311,29 @@ func (a *agent) write() {
 
 		case <-env.Die: // application quit
 			return
+		}
+	}
+}
+
+func (a *agent) notifySessionClosed(rpcClient *rpcClient, members []string) {
+	request := &clusterpb.SessionClosedRequest{
+		SessionId: a.session.ID(),
+	}
+
+	for _, remote := range members {
+		pool, err := rpcClient.getConnPool(remote)
+		if err != nil {
+			log.Print("Cannot retrieve connection pool for address", remote, err)
+			continue
+		}
+		client := clusterpb.NewMemberClient(pool.Get())
+		_, err = client.SessionClosed(context.Background(), request)
+		if err != nil {
+			log.Print("Cannot closed session in remote address", remote, err)
+			continue
+		}
+		if env.Debug {
+			log.Print("Notify remote server success", remote)
 		}
 	}
 }

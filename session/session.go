@@ -72,6 +72,17 @@ func New(entity NetworkEntity) *Session {
 	}
 }
 
+// NewWith returns a new session instance with a known ID
+func NewWith(id int64, entity NetworkEntity) *Session {
+	return &Session{
+		id:       id,
+		entity:   entity,
+		data:     make(map[string]interface{}),
+		lastTime: time.Now().Unix(),
+		router:   newRouter(),
+	}
+}
+
 // NetworkEntity returns the low-level network agent object
 func (s *Session) NetworkEntity() NetworkEntity {
 	return s.entity
@@ -113,10 +124,26 @@ func (s *Session) UID() int64 {
 	return atomic.LoadInt64(&s.uid)
 }
 
-// LastTime returns last heartbeat time in readable format
-func (s *Session) LastTime() string {
+// LastActivity returns last heartbeat time in readable format
+func (s *Session) LastActivity() string {
 	t := atomic.LoadInt64(&s.lastTime)
 	return time.Unix(t, 0).In(time.Local).Format(time.RFC822Z)
+}
+
+// LastTime returns last heartbeat time
+func (s *Session) LastTime() time.Time {
+	t := atomic.LoadInt64(&s.lastTime)
+	return time.Unix(t, 0).In(time.Local)
+}
+
+// AdvanceLastTime set last heartbeat time to now
+func (s *Session) AdvanceLastTime() {
+	atomic.StoreInt64(&s.lastTime, time.Now().Unix())
+}
+
+// AdvanceLastTimeTo set last heartbeat time to ts
+func (s *Session) AdvanceLastTimeTo(ts int64) {
+	atomic.StoreInt64(&s.lastTime, ts)
 }
 
 // LastMid returns the last message id

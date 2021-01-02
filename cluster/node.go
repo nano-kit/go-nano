@@ -154,6 +154,7 @@ func (n *Node) Startup() error {
 	}
 
 	n.startMonitor()
+	scheduler.NewTimer(67*time.Second, n.removeStaleSession)
 	return nil
 }
 
@@ -191,7 +192,7 @@ func (n *Node) initNode() error {
 	// Initialize the gRPC server and register service
 	n.rpcServer = grpc.NewServer()
 	n.rpcClient = newRPCClient()
-	scheduler.NewTimer(time.Minute, n.shrinkRPCClient)
+	scheduler.NewTimer(61*time.Second, n.shrinkRPCClient)
 	clusterpb.RegisterMemberServer(n.rpcServer, n)
 
 	go func() {
@@ -366,7 +367,7 @@ func (n *Node) findOrCreateSession(sid int64, gateAddr string) (*session.Session
 			rpcHandler: n.handler.remoteProcess,
 			gateAddr:   gateAddr,
 		}
-		s = session.New(ac)
+		s = session.NewWith(sid, ac)
 		ac.session = s
 		n.mu.Lock()
 		n.sessions[sid] = s
@@ -391,6 +392,7 @@ func (n *Node) HandleRequest(_ context.Context, req *clusterpb.RequestMessage) (
 		Data:  req.Data,
 	}
 	n.handler.localProcess(handler, req.Id, s, msg)
+	s.AdvanceLastTime()
 	return &clusterpb.MemberHandleResponse{}, nil
 }
 
@@ -409,6 +411,7 @@ func (n *Node) HandleNotify(_ context.Context, req *clusterpb.NotifyMessage) (*c
 		Data:  req.Data,
 	}
 	n.handler.localProcess(handler, 0, s, msg)
+	s.AdvanceLastTime()
 	return &clusterpb.MemberHandleResponse{}, nil
 }
 

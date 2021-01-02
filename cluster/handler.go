@@ -239,28 +239,7 @@ func (h *LocalHandler) handle(conn net.Conn) {
 
 	// guarantee agent related resource be destroyed
 	defer func() {
-		request := &clusterpb.SessionClosedRequest{
-			SessionId: agent.session.ID(),
-		}
-
-		members := h.currentNode.cluster.remoteAddrs()
-		for _, remote := range members {
-			pool, err := h.currentNode.rpcClient.getConnPool(remote)
-			if err != nil {
-				log.Print("Cannot retrieve connection pool for address", remote, err)
-				continue
-			}
-			client := clusterpb.NewMemberClient(pool.Get())
-			_, err = client.SessionClosed(context.Background(), request)
-			if err != nil {
-				log.Print("Cannot closed session in remote address", remote, err)
-				continue
-			}
-			if env.Debug {
-				log.Print("Notify remote server success", remote)
-			}
-		}
-
+		agent.notifySessionClosed(h.currentNode.rpcClient, h.currentNode.cluster.remoteAddrs())
 		h.currentNode.removeSession(agent.session)
 		agent.Close()
 		if env.Debug {
@@ -333,10 +312,11 @@ func (h *LocalHandler) processPacket(agent *agent, p *packet.Packet) error {
 		h.processMessage(agent, msg)
 
 	case packet.Heartbeat:
-		// expected
 	}
 
-	atomic.StoreInt64(&agent.lastAt, time.Now().Unix())
+	now := time.Now().Unix()
+	atomic.StoreInt64(&agent.lastAt, now)
+	agent.session.AdvanceLastTimeTo(now)
 	return nil
 }
 
