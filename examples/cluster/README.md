@@ -12,7 +12,7 @@ go build
 
 # run master server
 ./cluster master
-./cluster chat --listen "127.0.0.1:34580"
-./cluster gate --listen "127.0.0.1:34570" --gate-address "127.0.0.1:34590"
+./cluster chat
+./cluster gate
 ```
 

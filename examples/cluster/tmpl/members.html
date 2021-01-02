@@ -1,0 +1,21 @@
+{{define "members"}}
+<h2>Known Members:</h2>
+<table>
+    <thead><tr>
+        <th>Label</th>
+        <th>ServiceAddr</th>
+        <th>IsMaster</th>
+        <th>Services</th>
+    </tr></thead>
+    <tbody>
+    {{range .}}
+    <tr>
+        <td>{{.Label}}</td>
+        <td>{{.ServiceAddr}}</td>
+        <td>{{.IsMaster}}</td>
+        <td>{{.Services}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+{{end}}

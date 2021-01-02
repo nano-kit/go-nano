@@ -165,6 +165,33 @@ func (h *LocalHandler) LocalService() []string {
 	return result
 }
 
+type CompInfo struct {
+	Name         string
+	ReceiverType string
+	HandlerType  string
+	IsRawArg     bool
+	Scheduler    string
+}
+
+// Components show a sorted list for the node monitor
+func (h *LocalHandler) Components() []CompInfo {
+	var result []CompInfo
+	for _, service := range h.LocalService() {
+		s := h.localServices[service]
+		for _, handler := range s.SortedHandlers() {
+			m := s.Handlers[handler]
+			result = append(result, CompInfo{
+				Name:         fmt.Sprintf("%s.%s", service, handler),
+				ReceiverType: s.Type.String(),
+				HandlerType:  m.Type.String(),
+				IsRawArg:     m.IsRawArg,
+				Scheduler:    s.SchedName,
+			})
+		}
+	}
+	return result
+}
+
 func (h *LocalHandler) RemoteService() []string {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
@@ -174,6 +201,27 @@ func (h *LocalHandler) RemoteService() []string {
 		result = append(result, service)
 	}
 	sort.Strings(result)
+	return result
+}
+
+type RemoteInfo struct {
+	Name string
+	*clusterpb.MemberInfo
+}
+
+func (h *LocalHandler) Remotes() []RemoteInfo {
+	var result []RemoteInfo
+	for _, remote := range h.RemoteService() {
+		h.mu.RLock()
+		s := h.remoteServices[remote]
+		for _, m := range s {
+			result = append(result, RemoteInfo{
+				Name:       remote,
+				MemberInfo: m,
+			})
+		}
+		h.mu.RUnlock()
+	}
 	return result
 }
 

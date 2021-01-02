@@ -23,6 +23,7 @@ package component
 import (
 	"errors"
 	"reflect"
+	"sort"
 )
 
 type (
@@ -125,4 +126,13 @@ func (s *Service) ExtractHandler() error {
 	}
 
 	return nil
+}
+
+func (s *Service) SortedHandlers() []string {
+	var result []string
+	for handler := range s.Handlers {
+		result = append(result, handler)
+	}
+	sort.Strings(result)
+	return result
 }

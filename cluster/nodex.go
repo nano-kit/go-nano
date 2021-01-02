@@ -22,6 +22,7 @@ package cluster
 
 import (
 	"expvar"
+	"html/template"
 	"net"
 	"net/http"
 	"net/http/pprof"
@@ -63,6 +64,12 @@ func (n *Node) startMonitor() {
 	log.Print("Node monitor running at", monitorURL)
 }
 
+func (n *Node) Members() []*Member {
+	n.cluster.mu.RLock()
+	defer n.cluster.mu.RUnlock()
+	return n.cluster.members
+}
+
 func determineMonitorAddr(serviceAddr string) (monitorAddr string) {
 	// ignore err here because serviceAddr should be validated
 	host, port, _ := net.SplitHostPort(serviceAddr)
@@ -79,5 +86,21 @@ func determineMonitorAddr(serviceAddr string) (monitorAddr string) {
 }
 
 func (n *Node) nodeInfo(w http.ResponseWriter, r *http.Request) {
-
+	const tmplPath = "./tmpl/"
+	nodeTmpl, err := template.ParseFiles(
+		tmplPath+"node.html",
+		tmplPath+"components.html",
+		tmplPath+"remotes.html",
+		tmplPath+"members.html",
+		tmplPath+"sessions.html",
+		tmplPath+"mesh.html",
+	)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	if err := nodeTmpl.Execute(w, n); err != nil {
+		log.Print(err)
+		return
+	}
 }

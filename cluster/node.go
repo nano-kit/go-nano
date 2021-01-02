@@ -203,8 +203,8 @@ func (n *Node) initNode() error {
 	if n.IsMaster {
 		clusterpb.RegisterMasterServer(n.rpcServer, n.cluster)
 		member := &Member{
-			isMaster: true,
-			memberInfo: &clusterpb.MemberInfo{
+			IsMaster: true,
+			MemberInfo: &clusterpb.MemberInfo{
 				Label:       n.Label,
 				ServiceAddr: n.ServiceAddr,
 				Services:    n.handler.LocalService(),

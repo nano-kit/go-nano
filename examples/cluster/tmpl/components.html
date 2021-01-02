@@ -1,0 +1,23 @@
+{{define "components"}}
+<h2>Registered Components:</h2>
+<table>
+    <thead><tr>
+        <th>Name</th>
+        <th>ReceiverType</th>
+        <th>HandlerType</th>
+        <th>IsRawArg</th>
+        <th>Scheduler</th>
+    </tr></thead>
+    <tbody>
+    {{range .}}
+    <tr>
+        <td>{{.Name}}</td>
+        <td>{{.ReceiverType}}</td>
+        <td>{{.HandlerType}}</td>
+        <td>{{.IsRawArg}}</td>
+        <td>{{.Scheduler}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+{{end}}

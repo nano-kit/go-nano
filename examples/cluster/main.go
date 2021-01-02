@@ -30,7 +30,7 @@ func main() {
 				cli.StringFlag{
 					Name:  "listen,l",
 					Usage: "Master service listen address",
-					Value: "127.0.0.1:34567",
+					Value: "127.0.0.1:34560",
 				},
 			},
 			Action: runMaster,
@@ -41,17 +41,17 @@ func main() {
 				cli.StringFlag{
 					Name:  "master",
 					Usage: "master server address",
-					Value: "127.0.0.1:34567",
+					Value: "127.0.0.1:34560",
 				},
 				cli.StringFlag{
 					Name:  "listen,l",
 					Usage: "Gate service listen address",
-					Value: "",
+					Value: "127.0.0.1:34570",
 				},
 				cli.StringFlag{
 					Name:  "gate-address",
 					Usage: "Client connect address",
-					Value: "",
+					Value: "127.0.0.1:34590",
 				},
 			},
 			Action: runGate,
@@ -62,12 +62,12 @@ func main() {
 				cli.StringFlag{
 					Name:  "master",
 					Usage: "master server address",
-					Value: "127.0.0.1:34567",
+					Value: "127.0.0.1:34560",
 				},
 				cli.StringFlag{
 					Name:  "listen,l",
 					Usage: "Chat service listen address",
-					Value: "",
+					Value: "127.0.0.1:34580",
 				},
 			},
 			Action: runChat,
@@ -90,17 +90,7 @@ func runMaster(args *cli.Context) error {
 		return errors.Errorf("master listen address cannot empty")
 	}
 
-	webDir := filepath.Join(srcPath(), "master", "web")
-	log.Print("Nano master server web content directory", webDir)
-	log.Print("Nano master listen address", listen)
-	log.Print("Open http://127.0.0.1:12345/web/ in browser")
-
-	http.Handle("/web/", http.StripPrefix("/web/", http.FileServer(http.Dir(webDir))))
-	go func() {
-		if err := http.ListenAndServe(":12345", nil); err != nil {
-			panic(err)
-		}
-	}()
+	log.Println("Nano master listen address", listen)
 
 	// Register session closed callback
 	session.Lifetime.OnClosed(master.OnSessionClosed)
@@ -132,9 +122,13 @@ func runGate(args *cli.Context) error {
 		return errors.Errorf("gate address cannot empty")
 	}
 
-	log.Print("Current server listen address", listen)
-	log.Print("Current gate server address", gateAddr)
-	log.Print("Remote master server address", masterAddr)
+	log.Println("Current server listen address", listen)
+	log.Println("Current gate server address", gateAddr)
+	log.Println("Remote master server address", masterAddr)
+
+	webDir := filepath.Join(srcPath(), "web")
+	log.Println("Nano gate server web content directory", webDir)
+	log.Println("Open http://" + gateAddr + "/web/ in browser")
 
 	// Startup Nano server with the specified listen address
 	nano.Listen(listen,
@@ -144,6 +138,7 @@ func runGate(args *cli.Context) error {
 		nano.WithSerializer(json.NewSerializer()),
 		nano.WithIsWebsocket(true),
 		nano.WithWSPath("/nano"),
+		nano.WithHTTPHandler("/web/", http.StripPrefix("/web/", http.FileServer(http.Dir(webDir)))),
 		nano.WithCheckOriginFunc(func(_ *http.Request) bool { return true }),
 		nano.WithDebugMode(),
 	)
@@ -161,8 +156,8 @@ func runChat(args *cli.Context) error {
 		return errors.Errorf("master address cannot empty")
 	}
 
-	log.Print("Current chat server listen address", listen)
-	log.Print("Remote master server address", masterAddr)
+	log.Println("Current chat server listen address", listen)
+	log.Println("Remote master server address", masterAddr)
 
 	// Register session closed callback
 	session.Lifetime.OnClosed(chat.OnSessionClosed)

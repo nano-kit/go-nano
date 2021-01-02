@@ -23,10 +23,6 @@ package cluster
 import "github.com/aclisp/go-nano/cluster/clusterpb"
 
 type Member struct {
-	isMaster   bool
-	memberInfo *clusterpb.MemberInfo
-}
-
-func (m *Member) MemberInfo() *clusterpb.MemberInfo {
-	return m.memberInfo
+	IsMaster bool
+	*clusterpb.MemberInfo
 }

@@ -1,0 +1,28 @@
+<html>
+<head>
+    <title>/debug/nano/node</title>
+</head>
+<body>
+<h1>/debug/nano/node</h1>
+<h2>Node Options:</h2>
+<table>
+    <thead><tr><th>Key</th><th>Value</th></tr></thead>
+    <tbody>
+    <tr><td>Label</td><td>{{.Label}}</td></tr>
+    <tr><td>ServiceAddr</td><td>{{.ServiceAddr}}</td></tr>
+    <tr><td>IsMaster</td><td>{{.IsMaster}}</td></tr>
+    <tr><td>RegistryAddr</td><td>{{.RegistryAddr}}</td></tr>
+    <tr><td>RegisterInterval</td><td>{{.RegisterInterval}}</td></tr>
+    <tr><td>GateAddr</td><td>{{.GateAddr}}</td></tr>
+    <tr><td>MonitorAddr</td><td>{{.MonitorAddr}}</td></tr>
+    <tr><td>IsWebsocket</td><td>{{.IsWebsocket}}</td></tr>
+    <tr><td>TSLCertificate</td><td>{{.TSLCertificate}}</td></tr>
+    <tr><td>TSLKey</td><td>{{.TSLKey}}</td></tr>
+    <tr><td>WSPath</td><td>{{.WSPath}}</td></tr>
+    </tbody>
+</table>
+{{template "components" .Handler.Components}}
+{{template "remotes" .Handler.Remotes}}
+{{template "members" .Members}}
+</body>
+</html>

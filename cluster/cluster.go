@@ -53,7 +53,7 @@ func (c *cluster) Register(_ context.Context, req *clusterpb.RegisterRequest) (*
 
 	resp := &clusterpb.RegisterResponse{}
 	for _, m := range c.members {
-		if m.memberInfo.ServiceAddr == req.MemberInfo.ServiceAddr {
+		if m.ServiceAddr == req.MemberInfo.ServiceAddr {
 			return nil, fmt.Errorf("address %s has registered", req.MemberInfo.ServiceAddr)
 		}
 	}
@@ -61,11 +61,11 @@ func (c *cluster) Register(_ context.Context, req *clusterpb.RegisterRequest) (*
 	// Notify registered node to update remote services
 	newMember := &clusterpb.NewMemberRequest{MemberInfo: req.MemberInfo}
 	for _, m := range c.members {
-		resp.Members = append(resp.Members, m.memberInfo)
-		if m.isMaster {
+		resp.Members = append(resp.Members, m.MemberInfo)
+		if m.IsMaster {
 			continue
 		}
-		pool, err := c.rpcClient.getConnPool(m.memberInfo.ServiceAddr)
+		pool, err := c.rpcClient.getConnPool(m.ServiceAddr)
 		if err != nil {
 			return nil, err
 		}
@@ -81,7 +81,7 @@ func (c *cluster) Register(_ context.Context, req *clusterpb.RegisterRequest) (*
 	// Register services to current node
 	c.currentNode.handler.addRemoteService(req.MemberInfo)
 	c.mu.Lock()
-	c.members = append(c.members, &Member{isMaster: false, memberInfo: req.MemberInfo})
+	c.members = append(c.members, &Member{MemberInfo: req.MemberInfo})
 	c.mu.Unlock()
 	return resp, nil
 }
@@ -95,7 +95,7 @@ func (c *cluster) Unregister(_ context.Context, req *clusterpb.UnregisterRequest
 	var index = -1
 	resp := &clusterpb.UnregisterResponse{}
 	for i, m := range c.members {
-		if m.memberInfo.ServiceAddr == req.ServiceAddr {
+		if m.ServiceAddr == req.ServiceAddr {
 			index = i
 			break
 		}
@@ -107,10 +107,10 @@ func (c *cluster) Unregister(_ context.Context, req *clusterpb.UnregisterRequest
 	// Notify registered node to update remote services
 	delMember := &clusterpb.DelMemberRequest{ServiceAddr: req.ServiceAddr}
 	for _, m := range c.members {
-		if m.MemberInfo().ServiceAddr == c.currentNode.ServiceAddr {
+		if m.ServiceAddr == c.currentNode.ServiceAddr {
 			continue
 		}
-		pool, err := c.rpcClient.getConnPool(m.memberInfo.ServiceAddr)
+		pool, err := c.rpcClient.getConnPool(m.ServiceAddr)
 		if err != nil {
 			return nil, err
 		}
@@ -143,7 +143,7 @@ func (c *cluster) remoteAddrs() []string {
 	var addrs []string
 	c.mu.RLock()
 	for _, m := range c.members {
-		addrs = append(addrs, m.memberInfo.ServiceAddr)
+		addrs = append(addrs, m.ServiceAddr)
 	}
 	c.mu.RUnlock()
 	return addrs
@@ -153,7 +153,7 @@ func (c *cluster) initMembers(members []*clusterpb.MemberInfo) {
 	c.mu.Lock()
 	for _, info := range members {
 		c.members = append(c.members, &Member{
-			memberInfo: info,
+			MemberInfo: info,
 		})
 	}
 	c.mu.Unlock()
@@ -163,15 +163,15 @@ func (c *cluster) addMember(info *clusterpb.MemberInfo) {
 	c.mu.Lock()
 	var found bool
 	for _, member := range c.members {
-		if member.memberInfo.ServiceAddr == info.ServiceAddr {
-			member.memberInfo = info
+		if member.ServiceAddr == info.ServiceAddr {
+			member.MemberInfo = info
 			found = true
 			break
 		}
 	}
 	if !found {
 		c.members = append(c.members, &Member{
-			memberInfo: info,
+			MemberInfo: info,
 		})
 	}
 	c.mu.Unlock()
@@ -181,7 +181,7 @@ func (c *cluster) delMember(addr string) {
 	c.mu.Lock()
 	var index = -1
 	for i, member := range c.members {
-		if member.memberInfo.ServiceAddr == addr {
+		if member.ServiceAddr == addr {
 			index = i
 			break
 		}

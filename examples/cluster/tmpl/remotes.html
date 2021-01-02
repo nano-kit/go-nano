@@ -1,0 +1,21 @@
+{{define "remotes"}}
+<h2>Remote Components:</h2>
+<table>
+    <thead><tr>
+        <th>Name</th>
+        <th>Label</th>
+        <th>ServiceAddr</th>
+        <th>Services</th>
+    </tr></thead>
+    <tbody>
+    {{range .}}
+    <tr>
+        <td>{{.Name}}</td>
+        <td>{{.Label}}</td>
+        <td>{{.ServiceAddr}}</td>
+        <td>{{.Services}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+{{end}}

@@ -3,6 +3,7 @@
 *.dll
 *.so
 *.dylib
+examples/cluster/cluster
 
 # Test binary, build with `go test -c`
 *.test
