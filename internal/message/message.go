@@ -191,7 +191,7 @@ func Decode(data []byte) (*Message, error) {
 		m.ID = id
 	}
 
-	if offset >= len(data) {
+	if offset > len(data) {
 		return nil, ErrWrongMessage
 	}
 

@@ -125,4 +125,7 @@ func Listen(addr string, opts ...Option) {
 // Shutdown send a signal to let 'nano' shutdown itself.
 func Shutdown() {
 	close(env.Die)
+	for atomic.LoadInt32(&running) != 0 {
+		time.Sleep(10 * time.Millisecond)
+	}
 }

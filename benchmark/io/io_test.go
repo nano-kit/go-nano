@@ -81,7 +81,7 @@ func TestIO(t *testing.T) {
 	go server()
 
 	// wait server startup
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
 	t.Log("server started")
 
 	for i := 0; i < conc; i++ {

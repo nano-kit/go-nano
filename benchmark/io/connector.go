@@ -161,7 +161,12 @@ func (c *Connector) On(event string, callback Callback) {
 // Close close the connection, and shutdown the benchmark
 func (c *Connector) Close() {
 	c.conn.Close()
-	close(c.die)
+	// prevent closing closed channel
+	select {
+	case <-c.die:
+	default:
+		close(c.die)
+	}
 }
 
 func (c *Connector) eventHandler(event string) (Callback, bool) {
