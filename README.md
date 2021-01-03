@@ -1,13 +1,13 @@
-# Nano
+# Go Nano
 
-Nano is an easy to use, fast, lightweight game server networking library for Go.
+Nano is a lightweight and efficient framework in Golang for real-time interactive systems.
 It provides a core network architecture and a series of tools and libraries that
 can help developers eliminate boring duplicate work for common underlying logic.
 The goal of nano is to improve development efficiency by eliminating the need to
 spend time on repetitious network related programming.
 
 Nano was designed for server-side applications like real-time games, social games,
-mobile games, etc of all sizes.
+mobile games, etc of all sizes. Nano also contains a simple JavaScript library to help developing web games.
 
 ## How to build a system with `Nano`
 
