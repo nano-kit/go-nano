@@ -7,21 +7,17 @@ your contribution accepted.
 ## Getting started
 
 - Fork the repository on GitHub.
-- Read the README.md for build instructions.
+- Read README.md for overview.
 - Play with the project, submit bugs, submit patches!
 
 ## Building Nano
 
 Developing Nano requires:
 
-* [Go 1.12](http://golang.org/doc/code.html)
+* Go 1.14
 * An internet connection to download the dependencies
 
 Simply run `make` to build the program.
-
-```sh
-make
-```
 
 ### Running tests
 
@@ -30,11 +26,11 @@ See [tests/README.md](./tests/README.md) for how to execute and add tests.
 
 ### Updating dependencies
 
-Failpoint manages dependencies using [Go module](https://github.com/golang/go/wiki/Modules).
+The project manages dependencies using [Go module](https://github.com/golang/go/wiki/Modules).
 To add or update a dependency, either
 
 * Use the `go mod edit` command to change the dependency, or
-* Edit `go.mod` and then run `make update` to update the checksum.
+* Edit `go.mod` and then run `make` to update the checksum.
 
 ## Contribution flow
 
@@ -52,10 +48,10 @@ Thanks for your contributions!
 
 ### Code style
 
-The coding style suggested by the Golang community is used in `failpoint`.
+The coding style suggested by the Golang community is used.
 See the [style doc](https://github.com/golang/go/wiki/CodeReviewComments) for details.
 
-Please follow this style to makeg `failpoint` easy to review, maintain and develop.
+Please follow this style to make `go-nano` easy to review, maintain and develop.
 
 ### Format of the Commit Message
 
@@ -91,4 +87,3 @@ If the change affects many subsystems, you can use ```*``` instead, like ```*:``
 For the why part, if no specific reason for the change,
 you can use one of some generic reasons like "Improve documentation.",
 "Improve performance.", "Improve robustness.", "Improve test coverage."
-

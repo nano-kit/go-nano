@@ -8,6 +8,4 @@ This file lists who are the core maintainers of the nano project.
 
 ## Other Core Maintainers
 
-* None
-
-
+* [aclisp](https://github.com/aclisp)
