@@ -1,7 +1,6 @@
 package protobuf
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/aclisp/go-nano/benchmark/testdata"
@@ -21,7 +20,7 @@ func TestProtobufSerialezer_Serialize(t *testing.T) {
 		t.Fatalf("unmarshal failed: %v", err)
 	}
 
-	if !reflect.DeepEqual(m, m1) {
+	if m.Content != m1.Content {
 		t.Fail()
 	}
 }
