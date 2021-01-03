@@ -234,10 +234,13 @@ func (n *Node) initNode() error {
 				n.cluster.initMembers(resp.Members)
 				break
 			}
-			log.Print("Register current node to cluster failed", err, "and will retry in", n.RegisterInterval.String())
+
+			log.Print("Register current node to cluster failed", err, "and will unregister then retry in", n.RegisterInterval.String())
+			if err := n.unregister(); err != nil {
+				return err
+			}
 			time.Sleep(n.RegisterInterval)
 		}
-
 	}
 
 	return nil
@@ -259,26 +262,30 @@ func (n *Node) Shutdown() {
 	}
 
 	if !n.IsMaster && n.RegistryAddr != "" {
-		pool, err := n.rpcClient.getConnPool(n.RegistryAddr)
-		if err != nil {
-			log.Print("Retrieve master address error", err)
-			goto EXIT
-		}
-		client := clusterpb.NewMasterClient(pool.Get())
-		request := &clusterpb.UnregisterRequest{
-			ServiceAddr: n.ServiceAddr,
-		}
-		_, err = client.Unregister(context.Background(), request)
-		if err != nil {
-			log.Print("Unregister current node failed", err)
-			goto EXIT
-		}
+		n.unregister()
 	}
 
-EXIT:
 	if n.rpcServer != nil {
 		n.rpcServer.GracefulStop()
 	}
+}
+
+func (n *Node) unregister() error {
+	pool, err := n.rpcClient.getConnPool(n.RegistryAddr)
+	if err != nil {
+		log.Print("Retrieve master address error", err)
+		return err
+	}
+	client := clusterpb.NewMasterClient(pool.Get())
+	request := &clusterpb.UnregisterRequest{
+		ServiceAddr: n.ServiceAddr,
+	}
+	_, err = client.Unregister(context.Background(), request)
+	if err != nil {
+		log.Print("Unregister current node failed", err)
+		return err
+	}
+	return nil
 }
 
 // Enable current server accept connection
