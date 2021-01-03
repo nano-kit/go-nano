@@ -112,7 +112,7 @@ func (h *LocalHandler) register(comp component.Component, opts []component.Optio
 	h.localServices[s.Name] = s
 	for name, handler := range s.Handlers {
 		n := fmt.Sprintf("%s.%s", s.Name, name)
-		log.Print("Register local handler", n)
+		log.Print("register local handler", n)
 		h.localHandlers[n] = handler
 	}
 	return nil
@@ -129,7 +129,7 @@ func (h *LocalHandler) addRemoteService(member *clusterpb.MemberInfo) {
 	defer h.mu.Unlock()
 
 	for _, s := range member.Services {
-		log.Print("Register remote service", s)
+		log.Print("register remote service", s)
 		h.remoteServices[s] = append(h.remoteServices[s], member)
 	}
 }
@@ -234,7 +234,7 @@ func (h *LocalHandler) handle(conn net.Conn) {
 	go agent.write()
 
 	if env.Debug {
-		log.Printf("New session established: %s", agent.String())
+		log.Printf("new session established: %s", agent.String())
 	}
 
 	// guarantee agent related resource be destroyed
@@ -243,7 +243,7 @@ func (h *LocalHandler) handle(conn net.Conn) {
 		h.currentNode.removeSession(agent.session)
 		agent.Close()
 		if env.Debug {
-			log.Printf("Session read goroutine exit, SessionID=%d, UID=%d", agent.session.ID(), agent.session.UID())
+			log.Printf("session read goroutine exit, SessionID=%d, UID=%d", agent.session.ID(), agent.session.UID())
 		}
 	}()
 
@@ -252,7 +252,7 @@ func (h *LocalHandler) handle(conn net.Conn) {
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
-			log.Printf("Read message error: %s, session will be closed immediately", err.Error())
+			log.Printf("read message error: %s, session will be closed immediately", err.Error())
 			return
 		}
 
@@ -290,13 +290,13 @@ func (h *LocalHandler) processPacket(agent *agent, p *packet.Packet) error {
 
 		agent.setStatus(statusHandshake)
 		if env.Debug {
-			log.Printf("Session handshake Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr())
+			log.Printf("session handshake Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr())
 		}
 
 	case packet.HandshakeAck:
 		agent.setStatus(statusWorking)
 		if env.Debug {
-			log.Printf("Receive handshake ACK Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr())
+			log.Printf("receive handshake ACK Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr())
 		}
 
 	case packet.Data:
@@ -391,7 +391,7 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 		_, err = client.HandleNotify(context.Background(), request)
 	}
 	if err != nil {
-		log.Printf("Process remote message (%d:%s) error: %+v", msg.ID, msg.Route, err)
+		log.Printf("process remote message (%d:%s) error: %+v", msg.ID, msg.Route, err)
 	}
 }
 
@@ -403,7 +403,7 @@ func (h *LocalHandler) processMessage(agent *agent, msg *message.Message) {
 	case message.Notify:
 		lastMid = 0
 	default:
-		log.Print("Invalid message type: " + msg.Type.String())
+		log.Print("invalid message type: " + msg.Type.String())
 		return
 	}
 
@@ -428,7 +428,7 @@ func (h *LocalHandler) localProcess(handler *component.Handler, lastMid uint64, 
 	if pipe := h.pipeline; pipe != nil {
 		err := pipe.Inbound().Process(session, msg)
 		if err != nil {
-			log.Print("Pipeline process failed: " + err.Error())
+			log.Print("pipeline process failed: " + err.Error())
 			return
 		}
 	}
@@ -441,7 +441,7 @@ func (h *LocalHandler) localProcess(handler *component.Handler, lastMid uint64, 
 		data = reflect.New(handler.Type.Elem()).Interface()
 		err := env.Serializer.Unmarshal(payload, data)
 		if err != nil {
-			log.Printf("Deserialize to %T failed: %+v (%v)", data, err, payload)
+			log.Printf("deserialize to %T failed: %+v (%v)", data, err, payload)
 			return
 		}
 	}
@@ -462,7 +462,7 @@ func (h *LocalHandler) localProcess(handler *component.Handler, lastMid uint64, 
 		result := handler.Method.Func.Call(args)
 		if len(result) > 0 {
 			if err := result[0].Interface(); err != nil {
-				log.Printf("Service %s error: %+v", msg.Route, err)
+				log.Printf("service %s error: %+v", msg.Route, err)
 			}
 		}
 	}

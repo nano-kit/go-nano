@@ -163,7 +163,7 @@ func (c *rpcClient) shrinkTo(addrs []string) {
 		if !contains(addrs, curr) {
 			c.closePool(curr)
 			if env.Debug {
-				log.Print("Close rpc client to", curr)
+				log.Print("close rpc client to", curr)
 			}
 		}
 	}

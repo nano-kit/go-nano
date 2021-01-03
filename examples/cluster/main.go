@@ -73,7 +73,7 @@ func main() {
 			Action: runChat,
 		},
 	}
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
 	if err := app.Run(os.Args); err != nil {
 		log.Fatalf("Startup server error %+v", err)
 	}

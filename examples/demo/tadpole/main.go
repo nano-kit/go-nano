@@ -48,8 +48,7 @@ func serve(ctx *cli.Context) error {
 		nano.WithCheckOriginFunc(func(_ *http.Request) bool { return true }),
 	}
 
-	//nano.EnableDebug()
-	log.SetFlags(log.LstdFlags | log.Llongfile)
+	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 

@@ -21,12 +21,13 @@
 package scheduler
 
 import (
-	"log"
 	"math"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/aclisp/go-nano/internal/log"
 )
 
 const (
@@ -92,7 +93,7 @@ func (t *Timer) Stop() {
 func safecall(id int64, fn TimerFunc) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Printf("Handle timer panic: %+v\n%s", err, debug.Stack())
+			log.Printf("handle timer panic: %+v\n%s", err, debug.Stack())
 		}
 	}()
 

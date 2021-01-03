@@ -34,7 +34,7 @@ type Logger interface {
 }
 
 func init() {
-	SetLogger(log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile|log.Lmicroseconds))
+	SetLogger(log.New(os.Stderr, "[nano] ", log.LstdFlags|log.Lshortfile|log.Lmicroseconds|log.Lmsgprefix))
 }
 
 var (

@@ -54,7 +54,7 @@ var (
 // on incoming connections.
 func Listen(addr string, opts ...Option) {
 	if atomic.AddInt32(&running, 1) != 1 {
-		log.Print("Nano has running")
+		log.Print("nano has running")
 		return
 	}
 
@@ -76,7 +76,7 @@ func Listen(addr string, opts ...Option) {
 
 	// Use listen address as gate address in non-cluster mode
 	if !opt.IsMaster && opt.RegistryAddr == "" && opt.GateAddr == "" {
-		log.Print("The current server running in singleton mode")
+		log.Print("the current server running in singleton mode")
 		opt.GateAddr = addr
 	}
 
@@ -91,15 +91,15 @@ func Listen(addr string, opts ...Option) {
 	}
 	err := node.Startup()
 	if err != nil {
-		log.Fatalf("Node startup failed: %v", err)
+		log.Fatalf("node startup failed: %v", err)
 	}
 	runtime.CurrentNode = node
 
 	if node.GateAddr != "" {
-		log.Printf("Startup *Nano gate server* %s, gate address: %v, service address: %s",
+		log.Printf("startup *Nano Gate Server* %s, gate address: %v, service address: %s",
 			app.name, node.GateAddr, node.ServiceAddr)
 	} else {
-		log.Printf("Startup *Nano backend server* %s, service address %s",
+		log.Printf("startup *Nano Backend Server* %s, service address %s",
 			app.name, node.ServiceAddr)
 	}
 
@@ -109,12 +109,12 @@ func Listen(addr string, opts ...Option) {
 
 	select {
 	case <-env.Die:
-		log.Print("The app will shutdown in a few seconds")
+		log.Print("the app will shutdown in a few seconds")
 	case s := <-sg:
-		log.Print("Nano server got signal", s)
+		log.Print("nano server got signal", s)
 	}
 
-	log.Print("Nano server is stopping...")
+	log.Print("nano server is stopping...")
 
 	node.Shutdown()
 	runtime.CurrentNode = nil

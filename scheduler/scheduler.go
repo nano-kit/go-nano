@@ -54,7 +54,7 @@ var (
 func try(f func()) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Printf("Handle message panic: %+v\n%s", err, debug.Stack())
+			log.Printf("handle message panic: %+v\n%s", err, debug.Stack())
 		}
 	}()
 	f()
@@ -91,7 +91,7 @@ func Close() {
 	}
 	close(chDie)
 	<-chExit
-	log.Print("Scheduler stopped")
+	log.Print("scheduler stopped")
 }
 
 func PushTask(task Task) {

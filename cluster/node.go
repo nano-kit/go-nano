@@ -198,7 +198,7 @@ func (n *Node) initNode() error {
 	go func() {
 		err := n.rpcServer.Serve(listener)
 		if err != nil {
-			log.Fatalf("Start current node failed: %v", err)
+			log.Fatalf("start current node failed: %v", err)
 		}
 	}()
 
@@ -235,7 +235,7 @@ func (n *Node) initNode() error {
 				break
 			}
 
-			log.Print("Register current node to cluster failed", err, "and will unregister then retry in", n.RegisterInterval.String())
+			log.Print("register current node to cluster failed", err, "and will unregister then retry in", n.RegisterInterval.String())
 			if err := n.unregister(); err != nil {
 				return err
 			}
@@ -273,7 +273,7 @@ func (n *Node) Shutdown() {
 func (n *Node) unregister() error {
 	pool, err := n.rpcClient.getConnPool(n.RegistryAddr)
 	if err != nil {
-		log.Print("Retrieve master address error", err)
+		log.Print("retrieve master address error", err)
 		return err
 	}
 	client := clusterpb.NewMasterClient(pool.Get())
@@ -282,7 +282,7 @@ func (n *Node) unregister() error {
 	}
 	_, err = client.Unregister(context.Background(), request)
 	if err != nil {
-		log.Print("Unregister current node failed", err)
+		log.Print("unregister current node failed", err)
 		return err
 	}
 	return nil
@@ -332,7 +332,7 @@ func (n *Node) setupWSHandler() {
 	n.ServeMux.HandleFunc("/"+strings.TrimPrefix(n.WSPath, "/"), func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Printf("Upgrade failure, URI=%s, Error=%s", r.RequestURI, err.Error())
+			log.Printf("upgrade failure, URI=%s, Error=%s", r.RequestURI, err.Error())
 			return
 		}
 

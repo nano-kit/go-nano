@@ -40,7 +40,7 @@ func (n *Node) startMonitor() {
 		n.MonitorAddr = determineMonitorAddr(n.ServiceAddr)
 	}
 	if n.MonitorAddr == "" {
-		log.Print("Can not start node monitor")
+		log.Print("can not start node monitor")
 		return
 	}
 
@@ -65,7 +65,7 @@ func (n *Node) startMonitor() {
 	if len(n.TSLCertificate) != 0 {
 		monitorURL = "https://" + n.MonitorAddr
 	}
-	log.Print("Node monitor running at", monitorURL)
+	log.Print("node monitor running at", monitorURL)
 }
 
 func (n *Node) Members() []*Member {
@@ -132,7 +132,7 @@ func (n *Node) removeStaleSession() {
 	for id, session := range n.sessions {
 		if session.LastTime().Before(deadline) {
 			if env.Debug {
-				log.Printf("Close stale session ID=%d, UID=%d", session.ID(), session.UID())
+				log.Printf("close stale session ID=%d, UID=%d", session.ID(), session.UID())
 			}
 			delete(n.sessions, id)
 			session.Close()

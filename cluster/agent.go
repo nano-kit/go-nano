@@ -200,7 +200,7 @@ func (a *agent) Close() error {
 	a.setStatus(statusClosed)
 
 	if env.Debug {
-		log.Printf("Session closed, ID=%d, UID=%d, IP=%s",
+		log.Printf("session closed, ID=%d, UID=%d, IP=%s",
 			a.session.ID(), a.session.UID(), a.conn.RemoteAddr())
 	}
 
@@ -244,7 +244,7 @@ func (a *agent) write() {
 		close(chWrite)
 		a.Close()
 		if env.Debug {
-			log.Printf("Session write goroutine exit, SessionID=%d, UID=%d", a.session.ID(), a.session.UID())
+			log.Printf("session write goroutine exit, SessionID=%d, UID=%d", a.session.ID(), a.session.UID())
 		}
 	}()
 
@@ -253,7 +253,7 @@ func (a *agent) write() {
 		case <-ticker.C:
 			deadline := time.Now().Add(-2 * env.Heartbeat).Unix()
 			if atomic.LoadInt64(&a.lastAt) < deadline {
-				log.Printf("Session heartbeat timeout, LastTime=%d, Deadline=%d", atomic.LoadInt64(&a.lastAt), deadline)
+				log.Printf("session heartbeat timeout, LastTime=%d, Deadline=%d", atomic.LoadInt64(&a.lastAt), deadline)
 				return
 			}
 			chWrite <- hbd
@@ -270,9 +270,9 @@ func (a *agent) write() {
 			if err != nil {
 				switch data.typ {
 				case message.Push:
-					log.Printf("Push: %s error: %s", data.route, err.Error())
+					log.Printf("push: %s error: %s", data.route, err.Error())
 				case message.Response:
-					log.Printf("Response message(id: %d) error: %s", data.mid, err.Error())
+					log.Printf("response message(id: %d) error: %s", data.mid, err.Error())
 				}
 				break
 			}
@@ -323,17 +323,17 @@ func (a *agent) notifySessionClosed(rpcClient *rpcClient, members []string) {
 	for _, remote := range members {
 		pool, err := rpcClient.getConnPool(remote)
 		if err != nil {
-			log.Print("Cannot retrieve connection pool for address", remote, err)
+			log.Print("cannot retrieve connection pool for address", remote, err)
 			continue
 		}
 		client := clusterpb.NewMemberClient(pool.Get())
 		_, err = client.SessionClosed(context.Background(), request)
 		if err != nil {
-			log.Print("Cannot closed session in remote address", remote, err)
+			log.Print("cannot closed session in remote address", remote, err)
 			continue
 		}
 		if env.Debug {
-			log.Print("Notify remote server success", remote)
+			log.Print("notify remote server success", remote)
 		}
 	}
 }
