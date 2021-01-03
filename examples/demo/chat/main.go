@@ -152,7 +152,7 @@ func main() {
 		nano.WithCheckOriginFunc(func(_ *http.Request) bool { return true }),
 		nano.WithWSPath("/nano"),
 		nano.WithHTTPHandler("/web/", http.StripPrefix("/web/", http.FileServer(http.Dir("web")))),
-		nano.WithDebugMode(),
+		//nano.WithDebugMode(),
 		nano.WithSerializer(json.NewSerializer()), // override default serializer
 		nano.WithComponents(components),
 	)

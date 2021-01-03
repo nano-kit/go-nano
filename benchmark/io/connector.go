@@ -21,11 +21,11 @@
 package io
 
 import (
-	"log"
 	"net"
 	"sync"
 
 	"github.com/aclisp/go-nano/internal/codec"
+	"github.com/aclisp/go-nano/internal/log"
 	"github.com/aclisp/go-nano/internal/message"
 	"github.com/aclisp/go-nano/internal/packet"
 	"github.com/golang/protobuf/proto"
@@ -211,14 +211,13 @@ func (c *Connector) sendMessage(msg *message.Message) error {
 }
 
 func (c *Connector) write() {
-	defer close(c.chSend)
-
 	for {
 		select {
 		case data := <-c.chSend:
 			if _, err := c.conn.Write(data); err != nil {
 				log.Print(err.Error())
 				c.Close()
+				return
 			}
 
 		case <-c.die:
@@ -303,4 +302,8 @@ func serialize(v proto.Message) ([]byte, error) {
 		return nil, err
 	}
 	return data, nil
+}
+
+func deserialize(data []byte, v proto.Message) error {
+	return proto.Unmarshal(data, v)
 }

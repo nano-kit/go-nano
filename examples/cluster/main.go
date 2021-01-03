@@ -100,7 +100,7 @@ func runMaster(args *cli.Context) error {
 		nano.WithMaster(),
 		nano.WithComponents(master.Services),
 		nano.WithSerializer(json.NewSerializer()),
-		nano.WithDebugMode(),
+		//nano.WithDebugMode(),
 	)
 
 	return nil
@@ -140,7 +140,7 @@ func runGate(args *cli.Context) error {
 		nano.WithWSPath("/nano"),
 		nano.WithHTTPHandler("/web/", http.StripPrefix("/web/", http.FileServer(http.Dir(webDir)))),
 		nano.WithCheckOriginFunc(func(_ *http.Request) bool { return true }),
-		nano.WithDebugMode(),
+		//nano.WithDebugMode(),
 	)
 	return nil
 }
@@ -167,7 +167,7 @@ func runChat(args *cli.Context) error {
 		nano.WithRegistryAddr(masterAddr),
 		nano.WithComponents(chat.Services),
 		nano.WithSerializer(json.NewSerializer()),
-		nano.WithDebugMode(),
+		//nano.WithDebugMode(),
 	)
 
 	return nil

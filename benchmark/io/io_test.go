@@ -3,7 +3,6 @@
 package io
 
 import (
-	"log"
 	"os"
 	"os/signal"
 	"sync/atomic"
@@ -14,13 +13,12 @@ import (
 	"github.com/aclisp/go-nano"
 	"github.com/aclisp/go-nano/benchmark/testdata"
 	"github.com/aclisp/go-nano/component"
-	"github.com/aclisp/go-nano/serialize/protobuf"
 	"github.com/aclisp/go-nano/session"
 )
 
 const (
 	addr = "127.0.0.1:13250" // local address
-	conc = 1000              // concurrent client count
+	conc = 10                // concurrent client count
 )
 
 //
@@ -47,10 +45,12 @@ func (h *TestHandler) Ping(s *session.Session, data *testdata.Ping) error {
 }
 
 func server() {
-	nano.Register(&TestHandler{})
-	nano.SetSerializer(protobuf.NewSerializer())
-
-	nano.Listen(addr)
+	components := &component.Components{}
+	components.Register(&TestHandler{})
+	nano.Listen(addr,
+		nano.WithComponents(components),
+		//nano.WithDebugMode(),
+	)
 }
 
 func client() {
@@ -65,7 +65,10 @@ func client() {
 		panic(err)
 	}
 
-	c.On("pong", func(data interface{}) {})
+	c.On("pong", func(data interface{}) {
+		res := new(testdata.Pong)
+		deserialize(data.([]byte), res)
+	})
 
 	<-chReady
 	for {
@@ -79,13 +82,13 @@ func TestIO(t *testing.T) {
 
 	// wait server startup
 	time.Sleep(1 * time.Second)
+	t.Log("server started")
+
 	for i := 0; i < conc; i++ {
 		go client()
 	}
 
-	log.SetFlags(log.LstdFlags | log.Llongfile)
-
-	sg := make(chan os.Signal)
+	sg := make(chan os.Signal, 1)
 	signal.Notify(sg, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL)
 
 	<-sg
