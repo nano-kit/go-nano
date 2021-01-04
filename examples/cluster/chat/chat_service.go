@@ -42,8 +42,8 @@ type SyncMessage struct {
 }
 
 func (rs *RoomService) SyncMessage(s *session.Session, msg *SyncMessage) error {
-	// Send an RPC to master server to stats
-	if err := s.RPC("TopicService.Stats", &protocol.MasterStats{UID: s.UID()}); err != nil {
+	// Send an Notify to master server to stats
+	if err := s.Notify("TopicService.Stats", &protocol.MasterStats{UID: s.UID()}); err != nil {
 		return errors.Trace(err)
 	}
 

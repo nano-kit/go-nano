@@ -79,7 +79,7 @@ func NewOptions() Options {
 // which provides respective service
 type Node struct {
 	Options            // current node options
-	ServiceAddr string // current server service address (RPC)
+	ServiceAddr string // current server service address
 
 	cluster   *cluster
 	handler   *LocalHandler

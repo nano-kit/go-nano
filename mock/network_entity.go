@@ -55,8 +55,8 @@ func NewNetworkEntity() *NetworkEntity {
 	}
 }
 
-// RPC implements the session.NetworkEntity interface
-func (n *NetworkEntity) RPC(route string, v interface{}) error {
+// Notify implements the session.NetworkEntity interface
+func (n *NetworkEntity) Notify(route string, v interface{}) error {
 	n.rpcCall = append(n.rpcCall, message{route: route, data: v})
 	return nil
 }

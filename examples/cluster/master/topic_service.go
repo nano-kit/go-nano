@@ -65,7 +65,7 @@ func (ts *TopicService) NewUser(s *session.Session, msg *protocol.NewUserRequest
 		GateUID:   msg.GateUID,
 		MasterUID: uid,
 	}
-	return s.RPC("RoomService.JoinRoom", chat)
+	return s.Notify("RoomService.JoinRoom", chat)
 }
 
 type UserBalanceResponse struct {

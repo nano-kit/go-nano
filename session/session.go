@@ -33,7 +33,7 @@ import (
 // NetworkEntity represent low-level network instance
 type NetworkEntity interface {
 	Push(route string, v interface{}) error
-	RPC(route string, v interface{}) error
+	Notify(route string, v interface{}) error
 	LastMid() uint64
 	Response(v interface{}) error
 	ResponseMid(mid uint64, v interface{}) error
@@ -93,9 +93,9 @@ func (s *Session) Router() *Router {
 	return s.router
 }
 
-// RPC sends message to remote server
-func (s *Session) RPC(route string, v interface{}) error {
-	return s.entity.RPC(route, v)
+// Notify sends message to remote server
+func (s *Session) Notify(route string, v interface{}) error {
+	return s.entity.Notify(route, v)
 }
 
 // Push message to client

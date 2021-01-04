@@ -34,8 +34,8 @@ func (a *acceptor) Push(route string, v interface{}) error {
 	return err
 }
 
-// RPC implements the session.NetworkEntity interface
-func (a *acceptor) RPC(route string, v interface{}) error {
+// Notify implements the session.NetworkEntity interface
+func (a *acceptor) Notify(route string, v interface{}) error {
 	// TODO: buffer
 	data, err := message.Serialize(v)
 	if err != nil {

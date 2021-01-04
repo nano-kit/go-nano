@@ -135,8 +135,8 @@ func (a *agent) Push(route string, v interface{}) error {
 	return a.send(pendingMessage{typ: message.Push, route: route, payload: v})
 }
 
-// RPC, implementation for session.NetworkEntity interface
-func (a *agent) RPC(route string, v interface{}) error {
+// Notify, implementation for session.NetworkEntity interface
+func (a *agent) Notify(route string, v interface{}) error {
 	if a.status() == statusClosed {
 		return ErrBrokenPipe
 	}

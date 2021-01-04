@@ -32,7 +32,7 @@ func (bs *BindService) Login(s *session.Session, msg *LoginRequest) error {
 		Nickname: msg.Nickname,
 		GateUID:  uid,
 	}
-	if err := s.RPC("TopicService.NewUser", request); err != nil {
+	if err := s.Notify("TopicService.NewUser", request); err != nil {
 		return errors.Trace(err)
 	}
 	return s.Response(&LoginResponse{})
