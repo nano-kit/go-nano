@@ -46,9 +46,9 @@ const (
 var (
 	// ErrBrokenPipe represents the low-level connection has broken.
 	ErrBrokenPipe = errors.New("broken low-level pipe")
-	// ErrBufferExceed indicates that the current session buffer is full and
+	// ErrBufferExceeded indicates that the current session buffer is full and
 	// can not receive more data.
-	ErrBufferExceed = errors.New("session send buffer exceed")
+	ErrBufferExceeded = errors.New("session send buffer exceed")
 )
 
 type (
@@ -118,7 +118,7 @@ func (a *agent) Push(route string, v interface{}) error {
 	}
 
 	if len(a.chSend) >= agentWriteBacklog {
-		return ErrBufferExceed
+		return ErrBufferExceeded
 	}
 
 	if env.Debug {
@@ -173,7 +173,7 @@ func (a *agent) ResponseMid(mid uint64, v interface{}) error {
 	}
 
 	if len(a.chSend) >= agentWriteBacklog {
-		return ErrBufferExceed
+		return ErrBufferExceeded
 	}
 
 	if env.Debug {

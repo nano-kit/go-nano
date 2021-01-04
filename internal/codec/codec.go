@@ -33,8 +33,8 @@ const (
 	MaxPacketSize = 64 * 1024
 )
 
-// ErrPacketSizeExcced is the error used for encode/decode.
-var ErrPacketSizeExcced = errors.New("codec: packet size exceed")
+// ErrPacketSizeExceeded is the error used for encode/decode.
+var ErrPacketSizeExceeded = errors.New("codec: packet size exceeded")
 
 // A Decoder reads and decodes network data slice
 type Decoder struct {
@@ -61,7 +61,7 @@ func (c *Decoder) forward() error {
 
 	// packet length limitation
 	if c.size > MaxPacketSize {
-		return ErrPacketSizeExcced
+		return ErrPacketSizeExceeded
 	}
 	return nil
 }
