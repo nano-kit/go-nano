@@ -1,7 +1,5 @@
 # starx-chat-demo
-chat room demo base on [nano](https://github.com/lonnng/nano) in 100 lines
-
-refs: https://github.com/lonnng/nano
+chat room demo base on [go-nano](https://github.com/aclisp/go-nano) in 100 lines
 
 ## Required
 - golang
