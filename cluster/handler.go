@@ -336,7 +336,7 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 	service := msg.Route[:index]
 	members := h.findMembers(service)
 	if len(members) == 0 {
-		log.Printf("nano/handler: %s not found(forgot registered?)", msg.Route)
+		log.Printf("nano/handler: %s not found (forgot registered?)", msg.Route)
 		return
 	}
 
@@ -391,7 +391,7 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 		_, err = client.HandleNotify(context.Background(), request)
 	}
 	if err != nil {
-		log.Printf("process remote message (%d:%s) error: %+v", msg.ID, msg.Route, err)
+		log.Printf("process remote message to %s error: %+v", msg.Route, err)
 	}
 }
 
