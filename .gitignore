@@ -4,6 +4,8 @@
 *.so
 *.dylib
 examples/cluster/cluster
+examples/demo/chat/tmpl
+examples/demo/tadpole/tmpl
 
 # Test binary, build with `go test -c`
 *.test
