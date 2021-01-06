@@ -46,12 +46,10 @@ func serve(ctx *cli.Context) error {
 		nano.WithComponents(components),
 		nano.WithSerializer(json.NewSerializer()),
 		nano.WithCheckOriginFunc(func(_ *http.Request) bool { return true }),
+		nano.WithHTTPHandler("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static")))),
 	}
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
-
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-
 	addr := ctx.String("addr")
 	nano.Listen(addr, options...)
 	return nil

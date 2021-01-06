@@ -436,6 +436,11 @@ func (h *LocalHandler) localProcess(handler *component.Handler, lastMid uint64, 
 	var payload = msg.Data
 	var data interface{}
 	if handler.IsRawArg {
+		if len(payload) > 0 {
+			temp := make([]byte, len(payload))
+			copy(temp, payload)
+			payload = temp
+		}
 		data = payload
 	} else {
 		data = reflect.New(handler.Type.Elem()).Interface()
