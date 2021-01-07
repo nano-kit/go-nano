@@ -24,7 +24,10 @@ import "errors"
 
 // Errors that could be occurred during message handling.
 var (
-	ErrSessionOnNotify    = errors.New("current session working on notify mode")
-	ErrCloseClosedSession = errors.New("close closed session")
-	ErrInvalidRegisterReq = errors.New("invalid register request")
+	ErrSessionOnNotify     = errors.New("current session working on notify mode")
+	ErrCloseClosedSession  = errors.New("close closed session")
+	ErrInvalidRegisterReq  = errors.New("invalid register request")
+	ErrInvalidRoute        = errors.New("invalid route")
+	ErrMemberNotRegistered = errors.New("member is not registered")
+	ErrRPC                 = errors.New("broken rpc")
 )

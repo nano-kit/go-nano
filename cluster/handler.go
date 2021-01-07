@@ -52,7 +52,7 @@ var (
 	hbd []byte // heartbeat packet data
 )
 
-type rpcHandler func(session *session.Session, msg *message.Message, noCopy bool)
+type rpcHandler func(session *session.Session, msg *message.Message, noCopy bool) error
 
 func cache() {
 	data, err := json.Marshal(map[string]interface{}{
@@ -333,18 +333,18 @@ func (h *LocalHandler) findMembers(service string) []*clusterpb.MemberInfo {
 	return h.remoteServices[service]
 }
 
-func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Message, noCopy bool) {
+func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Message, noCopy bool) error {
 	index := strings.LastIndex(msg.Route, ".")
 	if index < 0 {
 		log.Printf("nano/handler: invalid route %s", msg.Route)
-		return
+		return ErrInvalidRoute
 	}
 
 	service := msg.Route[:index]
 	members := h.findMembers(service)
 	if len(members) == 0 {
 		log.Printf("nano/handler: %s not found (forgot registered?)", msg.Route)
-		return
+		return ErrMemberNotRegistered
 	}
 
 	// Select a remote service address
@@ -360,7 +360,7 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 	pool, err := h.currentNode.rpcClient.getConnPool(remoteAddr)
 	if err != nil {
 		log.Print(err)
-		return
+		return ErrRPC
 	}
 	var data = msg.Data
 	if !noCopy && len(msg.Data) > 0 {
@@ -399,7 +399,9 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 	}
 	if err != nil {
 		log.Printf("process remote message to %s error: %+v", msg.Route, err)
+		return ErrRPC
 	}
+	return nil
 }
 
 func (h *LocalHandler) processMessage(agent *agent, msg *message.Message) {
