@@ -39,15 +39,6 @@ func isExported(name string) bool {
 	return unicode.IsUpper(w)
 }
 
-func isExportedOrBuiltinType(t reflect.Type) bool {
-	for t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
-	// PkgPath will be non-empty even for an exported type,
-	// so we need to check the type name as well.
-	return isExported(t.Name()) || t.PkgPath() == ""
-}
-
 // isHandlerMethod decide a method is suitable handler method
 func isHandlerMethod(method reflect.Method) bool {
 	mt := method.Type

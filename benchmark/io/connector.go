@@ -28,7 +28,7 @@ import (
 	"github.com/aclisp/go-nano/internal/log"
 	"github.com/aclisp/go-nano/internal/message"
 	"github.com/aclisp/go-nano/internal/packet"
-	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/proto" //lint:ignore SA1019 keep using this old version of protobuf
 )
 
 var (

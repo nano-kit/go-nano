@@ -32,7 +32,7 @@ func runServer(addr string) {
 
 func waitFor(addr string, timeout time.Duration) (err error) {
 	begin := time.Now()
-	for time.Now().Sub(begin) < timeout {
+	for time.Since(begin) < timeout {
 		var conn net.Conn
 		if conn, err = net.Dial("tcp", addr); err != nil {
 			if strings.Contains(err.Error(), "connection refused") {

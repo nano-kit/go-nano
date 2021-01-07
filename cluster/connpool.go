@@ -82,10 +82,7 @@ func (a *connPool) Get() *grpc.ClientConn {
 func (a *connPool) Close() {
 	for i, c := range a.v {
 		if c != nil {
-			err := c.Close()
-			if err != nil {
-				// TODO: error handling
-			}
+			c.Close()
 			a.v[i] = nil
 		}
 	}

@@ -29,11 +29,6 @@ import (
 	"github.com/aclisp/go-nano/internal/log"
 )
 
-const (
-	messageQueueBacklog = 1 << 10
-	sessionCloseBacklog = 1 << 8
-)
-
 // LocalScheduler schedules task to a customized goroutine
 type LocalScheduler interface {
 	Schedule(Task)

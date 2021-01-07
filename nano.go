@@ -105,7 +105,7 @@ func Listen(addr string, opts ...Option) {
 
 	go scheduler.Sched()
 	sg := make(chan os.Signal, 1)
-	signal.Notify(sg, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL, syscall.SIGTERM)
+	signal.Notify(sg, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
 
 	select {
 	case <-env.Die:

@@ -160,7 +160,7 @@ func (n *Node) Startup() error {
 
 func (n *Node) waitForGate(timeout time.Duration) {
 	begin := time.Now()
-	for time.Now().Sub(begin) < timeout {
+	for time.Since(begin) < timeout {
 		if conn, err := net.Dial("tcp", n.GateAddr); err != nil {
 			if strings.Contains(err.Error(), "connection refused") {
 				time.Sleep(10 * time.Millisecond)

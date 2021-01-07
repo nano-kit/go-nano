@@ -23,7 +23,7 @@ package protobuf
 import (
 	"errors"
 
-	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/proto" //lint:ignore SA1019 keep using this old version of protobuf
 )
 
 // ErrWrongValueType is the error used for marshal the value with protobuf encoding.

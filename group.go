@@ -209,10 +209,7 @@ func (c *Group) Count() int {
 }
 
 func (c *Group) isClosed() bool {
-	if atomic.LoadInt32(&c.status) == groupStatusClosed {
-		return true
-	}
-	return false
+	return atomic.LoadInt32(&c.status) == groupStatusClosed
 }
 
 // Close destroy group, which will release all resource in the group
