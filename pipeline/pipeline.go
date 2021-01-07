@@ -11,8 +11,10 @@ type (
 	// Message is the alias of `message.Message`
 	Message = message.Message
 
+	// Func is the pipeline processing function
 	Func func(s *session.Session, msg *message.Message) error
 
+	// Pipeline is used as interceptor for inbound and outbound messages
 	Pipeline interface {
 		Outbound() Channel
 		Inbound() Channel
@@ -22,6 +24,7 @@ type (
 		outbound, inbound *pipelineChannel
 	}
 
+	// Channel is a container of pipeline processing functions
 	Channel interface {
 		PushFront(h Func)
 		PushBack(h Func)
@@ -34,6 +37,7 @@ type (
 	}
 )
 
+// New creates a pipeline
 func New() Pipeline {
 	return &pipeline{
 		outbound: &pipelineChannel{},

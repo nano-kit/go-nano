@@ -48,6 +48,7 @@ type (
 	}
 )
 
+// NewService creates a local service based on component
 func NewService(comp Component, opts []Option) *Service {
 	s := &Service{
 		Type:     reflect.TypeOf(comp),
@@ -69,7 +70,7 @@ func NewService(comp Component, opts []Option) *Service {
 	return s
 }
 
-// suitableMethods returns suitable methods of typ
+// suitableHandlerMethods returns suitable methods of typ
 func (s *Service) suitableHandlerMethods(typ reflect.Type) map[string]*Handler {
 	methods := make(map[string]*Handler)
 	for m := 0; m < typ.NumMethod(); m++ {
@@ -128,6 +129,7 @@ func (s *Service) ExtractHandler() error {
 	return nil
 }
 
+// SortedHandlers returns a sorted names
 func (s *Service) SortedHandlers() []string {
 	var result []string
 	for handler := range s.Handlers {

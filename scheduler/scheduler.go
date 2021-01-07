@@ -34,9 +34,8 @@ type LocalScheduler interface {
 	Schedule(Task)
 }
 
+// Task is a function
 type Task func()
-
-type Hook func()
 
 var (
 	chDie   = make(chan struct{})
@@ -55,6 +54,7 @@ func try(f func()) {
 	f()
 }
 
+// Sched runs the scheduler
 func Sched() {
 	if atomic.AddInt32(&started, 1) != 1 {
 		return
@@ -80,6 +80,7 @@ func Sched() {
 	}
 }
 
+// Close stops the scheduler
 func Close() {
 	if atomic.AddInt32(&closed, 1) != 1 {
 		return
@@ -89,6 +90,7 @@ func Close() {
 	log.Print("scheduler stopped")
 }
 
+// PushTask add task to scheduler
 func PushTask(task Task) {
 	chTasks <- task
 }

@@ -22,6 +22,7 @@ package message
 
 import "github.com/aclisp/go-nano/internal/env"
 
+// Serialize serializes the message
 func Serialize(v interface{}) ([]byte, error) {
 	if data, ok := v.([]byte); ok {
 		return data, nil

@@ -74,6 +74,7 @@ func cache() {
 	}
 }
 
+// LocalHandler is the container for all local registered components
 type LocalHandler struct {
 	localServices map[string]*component.Service // all registered service
 	localHandlers map[string]*component.Handler // all handler method
@@ -85,6 +86,7 @@ type LocalHandler struct {
 	currentNode *Node
 }
 
+// NewHandler creates a LocalHandler
 func NewHandler(currentNode *Node, pipeline pipeline.Pipeline) *LocalHandler {
 	h := &LocalHandler{
 		localServices:  make(map[string]*component.Service),
@@ -156,6 +158,7 @@ func (h *LocalHandler) delMember(addr string) {
 	}
 }
 
+// LocalService returns a sorted local service names
 func (h *LocalHandler) LocalService() []string {
 	var result []string
 	for service := range h.localServices {
@@ -165,6 +168,7 @@ func (h *LocalHandler) LocalService() []string {
 	return result
 }
 
+// CompInfo is the component information used by the node monitor
 type CompInfo struct {
 	Name         string
 	ReceiverType string
@@ -173,7 +177,7 @@ type CompInfo struct {
 	Scheduler    string
 }
 
-// Components show a sorted list for the node monitor
+// Components show a sorted list of local components for the node monitor
 func (h *LocalHandler) Components() []CompInfo {
 	var result []CompInfo
 	for _, service := range h.LocalService() {
@@ -192,6 +196,7 @@ func (h *LocalHandler) Components() []CompInfo {
 	return result
 }
 
+// RemoteService returns a sorted remote service names
 func (h *LocalHandler) RemoteService() []string {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
@@ -204,11 +209,13 @@ func (h *LocalHandler) RemoteService() []string {
 	return result
 }
 
+// RemoteInfo is the remote component information used by the node monitor
 type RemoteInfo struct {
 	Name string
 	*clusterpb.MemberInfo
 }
 
+// Remotes show a sorted remote components list for the node monitor
 func (h *LocalHandler) Remotes() []RemoteInfo {
 	var result []RemoteInfo
 	for _, remote := range h.RemoteService() {

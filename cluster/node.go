@@ -55,6 +55,7 @@ type Options struct {
 	WebsocketOptions
 }
 
+// WebsocketOptions contains WebSocket related configurations
 type WebsocketOptions struct {
 	IsWebsocket    bool
 	TSLCertificate string
@@ -64,6 +65,7 @@ type WebsocketOptions struct {
 	CheckOrigin    func(*http.Request) bool // check origin when websocket enabled
 }
 
+// NewOptions creates Options
 func NewOptions() Options {
 	return Options{
 		Components: &component.Components{},
@@ -109,6 +111,7 @@ func validateListenAddrWithExplicitPort(addr string) error {
 	return nil
 }
 
+// Startup starts the node
 func (n *Node) Startup() error {
 	if err := validateListenAddrWithExplicitPort(n.ServiceAddr); err != nil {
 		return fmt.Errorf("invalid node service address: %v", err)
@@ -173,6 +176,7 @@ func (n *Node) waitForGate(timeout time.Duration) {
 	}
 }
 
+// Handler returns node's local handler
 func (n *Node) Handler() *LocalHandler {
 	return n.handler
 }
@@ -383,6 +387,7 @@ func (n *Node) findOrCreateSession(sid int64, gateAddr string) (*session.Session
 	return s, nil
 }
 
+// HandleRequest implements the MemberServer interface
 func (n *Node) HandleRequest(_ context.Context, req *clusterpb.RequestMessage) (*clusterpb.MemberHandleResponse, error) {
 	handler, found := n.handler.localHandlers[req.Route]
 	if !found {
@@ -403,6 +408,7 @@ func (n *Node) HandleRequest(_ context.Context, req *clusterpb.RequestMessage) (
 	return &clusterpb.MemberHandleResponse{}, nil
 }
 
+// HandleNotify implements the MemberServer interface
 func (n *Node) HandleNotify(_ context.Context, req *clusterpb.NotifyMessage) (*clusterpb.MemberHandleResponse, error) {
 	handler, found := n.handler.localHandlers[req.Route]
 	if !found {
@@ -422,6 +428,7 @@ func (n *Node) HandleNotify(_ context.Context, req *clusterpb.NotifyMessage) (*c
 	return &clusterpb.MemberHandleResponse{}, nil
 }
 
+// HandlePush implements the MemberServer interface
 func (n *Node) HandlePush(_ context.Context, req *clusterpb.PushMessage) (*clusterpb.MemberHandleResponse, error) {
 	s := n.findSession(req.SessionId)
 	if s == nil {
@@ -430,6 +437,7 @@ func (n *Node) HandlePush(_ context.Context, req *clusterpb.PushMessage) (*clust
 	return &clusterpb.MemberHandleResponse{}, s.Push(req.Route, req.Data)
 }
 
+// HandleResponse implements the MemberServer interface
 func (n *Node) HandleResponse(_ context.Context, req *clusterpb.ResponseMessage) (*clusterpb.MemberHandleResponse, error) {
 	s := n.findSession(req.SessionId)
 	if s == nil {
@@ -438,12 +446,14 @@ func (n *Node) HandleResponse(_ context.Context, req *clusterpb.ResponseMessage)
 	return &clusterpb.MemberHandleResponse{}, s.ResponseMID(req.Id, req.Data)
 }
 
+// NewMember implements the MemberServer interface
 func (n *Node) NewMember(_ context.Context, req *clusterpb.NewMemberRequest) (*clusterpb.NewMemberResponse, error) {
 	n.handler.addRemoteService(req.MemberInfo)
 	n.cluster.addMember(req.MemberInfo)
 	return &clusterpb.NewMemberResponse{}, nil
 }
 
+// DelMember implements the MemberServer interface
 func (n *Node) DelMember(_ context.Context, req *clusterpb.DelMemberRequest) (*clusterpb.DelMemberResponse, error) {
 	n.handler.delMember(req.ServiceAddr)
 	n.cluster.delMember(req.ServiceAddr)

@@ -22,6 +22,7 @@ package cluster
 
 import "github.com/aclisp/go-nano/cluster/clusterpb"
 
+// Member is the remote component managed by cluster
 type Member struct {
 	IsMaster bool
 	*clusterpb.MemberInfo

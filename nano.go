@@ -32,7 +32,6 @@ import (
 	"github.com/aclisp/go-nano/cluster"
 	"github.com/aclisp/go-nano/internal/env"
 	"github.com/aclisp/go-nano/internal/log"
-	"github.com/aclisp/go-nano/internal/runtime"
 	"github.com/aclisp/go-nano/scheduler"
 )
 
@@ -93,7 +92,6 @@ func Listen(addr string, opts ...Option) {
 	if err != nil {
 		log.Fatalf("node startup failed: %v", err)
 	}
-	runtime.CurrentNode = node
 
 	if node.GateAddr != "" {
 		log.Printf("startup *Nano Gate Server* %s, gate address: %v, service address: %s",
@@ -117,7 +115,6 @@ func Listen(addr string, opts ...Option) {
 	log.Print("nano server is stopping...")
 
 	node.Shutdown()
-	runtime.CurrentNode = nil
 	scheduler.Close()
 	atomic.StoreInt32(&running, 0)
 }

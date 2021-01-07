@@ -12,6 +12,7 @@ type (
 	}
 )
 
+// Lifetime is the container of LifetimeHandlers
 var Lifetime = &lifetime{}
 
 // OnClosed set the Callback which will be called
@@ -20,6 +21,7 @@ func (lt *lifetime) OnClosed(h LifetimeHandler) {
 	lt.onClosed = append(lt.onClosed, h)
 }
 
+// Close is called at session closed
 func (lt *lifetime) Close(s *Session) {
 	if len(lt.onClosed) < 1 {
 		return

@@ -14,8 +14,10 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Option is a function to set cluster options
 type Option func(*cluster.Options)
 
+// WithPipeline sets processing pipelines
 func WithPipeline(pipeline pipeline.Pipeline) Option {
 	return func(opt *cluster.Options) {
 		opt.Pipeline = pipeline
@@ -89,6 +91,7 @@ func WithDictionary(dict map[string]uint16) Option {
 	}
 }
 
+// WithWSPath sets websocket URI path, effective when WebSocket is enabled
 func WithWSPath(path string) Option {
 	return func(opt *cluster.Options) {
 		opt.WSPath = path
@@ -151,6 +154,7 @@ func WithHandshakeValidator(fn func([]byte) error) Option {
 	}
 }
 
+// WithHTTPHandler sets a http handler that shares with WebSocket server
 func WithHTTPHandler(pattern string, handler http.Handler) Option {
 	return func(opt *cluster.Options) {
 		opt.ServeMux.Handle(pattern, handler)

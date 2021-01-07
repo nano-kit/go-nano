@@ -20,11 +20,13 @@
 
 package component
 
+// CompWithOptions is the internal representation of the to-be-registered component
 type CompWithOptions struct {
 	Comp Component
 	Opts []Option
 }
 
+// Components is the container of all the to-be-registered component
 type Components struct {
 	comps []CompWithOptions
 }

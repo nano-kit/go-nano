@@ -68,12 +68,14 @@ func (n *Node) startMonitor() {
 	log.Print("node monitor running at", monitorURL)
 }
 
+// Members returns the cluster managed members
 func (n *Node) Members() []*Member {
 	n.cluster.mu.RLock()
 	defer n.cluster.mu.RUnlock()
 	return n.cluster.members
 }
 
+// Sessions returns the node managed sessions
 func (n *Node) Sessions() []*session.Session {
 	n.mu.RLock()
 	var result = make([]*session.Session, 0, len(n.sessions))
