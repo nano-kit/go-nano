@@ -75,7 +75,7 @@ func Listen(addr string, opts ...Option) {
 
 	// Use listen address as gate address in non-cluster mode
 	if !opt.IsMaster && opt.RegistryAddr == "" && opt.GateAddr == "" {
-		log.Print("the current server running in singleton mode")
+		log.Print("current server running in singleton mode")
 		opt.GateAddr = addr
 	}
 
@@ -90,14 +90,14 @@ func Listen(addr string, opts ...Option) {
 	}
 	err := node.Startup()
 	if err != nil {
-		log.Fatalf("node startup failed: %v", err)
+		log.Fatalf("node startup failure: %v", err)
 	}
 
 	if node.GateAddr != "" {
-		log.Printf("startup *Nano Gate Server* %s, gate address: %v, service address: %s",
+		log.Printf("start nano gate server %s, gate address %s, service address %s",
 			app.name, node.GateAddr, node.ServiceAddr)
 	} else {
-		log.Printf("startup *Nano Backend Server* %s, service address %s",
+		log.Printf("start nano backend server %s, service address %s",
 			app.name, node.ServiceAddr)
 	}
 
