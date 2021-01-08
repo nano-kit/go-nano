@@ -131,7 +131,7 @@ func (h *LocalHandler) addRemoteService(member *clusterpb.MemberInfo) {
 	defer h.mu.Unlock()
 
 	for _, s := range member.Services {
-		log.Print("register remote service", s)
+		log.Printf("register remote service %s at node %s", s, member.ServiceAddr)
 		h.remoteServices[s] = append(h.remoteServices[s], member)
 	}
 }
@@ -259,7 +259,9 @@ func (h *LocalHandler) handle(conn net.Conn) {
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
-			log.Printf("read message error: %s, session will be closed immediately", err.Error())
+			if env.Debug {
+				log.Printf("read message error: %s, session will be closed immediately", err.Error())
+			}
 			return
 		}
 

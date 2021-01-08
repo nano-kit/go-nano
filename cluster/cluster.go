@@ -26,6 +26,7 @@ import (
 	"sync"
 
 	"github.com/aclisp/go-nano/cluster/clusterpb"
+	"github.com/aclisp/go-nano/internal/env"
 	"github.com/aclisp/go-nano/internal/log"
 )
 
@@ -76,7 +77,9 @@ func (c *cluster) Register(_ context.Context, req *clusterpb.RegisterRequest) (*
 		}
 	}
 
-	log.Print("new peer register to cluster", req.MemberInfo.ServiceAddr)
+	if env.Debug {
+		log.Print("new peer register to cluster", req.MemberInfo.ServiceAddr)
+	}
 
 	// Register services to current node
 	c.currentNode.handler.addRemoteService(req.MemberInfo)
@@ -121,7 +124,9 @@ func (c *cluster) Unregister(_ context.Context, req *clusterpb.UnregisterRequest
 		}
 	}
 
-	log.Print("exists peer unregister to cluster", req.ServiceAddr)
+	if env.Debug {
+		log.Print("node unregister from cluster", req.ServiceAddr)
+	}
 
 	// Register services to current node
 	c.currentNode.handler.delMember(req.ServiceAddr)

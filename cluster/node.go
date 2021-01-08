@@ -240,10 +240,8 @@ func (n *Node) initNode() error {
 			}
 
 			log.Print("register current node to cluster failed", err, "and will unregister then retry in", n.RegisterInterval.String())
-			if err := n.unregister(); err != nil {
-				return err
-			}
 			time.Sleep(n.RegisterInterval)
+			n.unregister()
 		}
 	}
 
