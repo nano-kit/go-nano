@@ -122,7 +122,7 @@ func Encode(m *Message) ([]byte, error) {
 		return nil, ErrWrongMessageType
 	}
 
-	buf := make([]byte, 0)
+	var buf []byte
 	flag := byte(m.Type) << 1
 
 	code, compressed := routes[m.Route]
