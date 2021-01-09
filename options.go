@@ -98,18 +98,6 @@ func WithWSPath(path string) Option {
 	}
 }
 
-// WithTimerPrecision sets the ticker precision, and time precision can not less
-// than a Millisecond, and can not change after application running. The default
-// precision is time.Second
-func WithTimerPrecision(precision time.Duration) Option {
-	if precision < time.Millisecond {
-		panic("time precision can not less than a Millisecond")
-	}
-	return func(_ *cluster.Options) {
-		env.TimerPrecision = precision
-	}
-}
-
 // WithSerializer customizes application serializer, which automatically Marshal
 // and UnMarshal handler payload
 func WithSerializer(serializer serialize.Serializer) Option {

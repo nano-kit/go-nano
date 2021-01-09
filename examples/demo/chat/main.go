@@ -22,7 +22,6 @@ type (
 	// RoomManager represents a component that contains a bundle of room
 	RoomManager struct {
 		component.Base
-		timer *scheduler.Timer
 		rooms map[int]*Room
 	}
 
@@ -48,29 +47,32 @@ type (
 		Result string `json:"result"`
 	}
 
-	stats struct {
+	Stats struct {
 		component.Base
-		timer         *scheduler.Timer
 		outboundBytes int
 		inboundBytes  int
 	}
 )
 
-func (stats *stats) outbound(s *session.Session, msg *pipeline.Message) error {
+func (stats *Stats) outbound(s *session.Session, msg *pipeline.Message) error {
 	stats.outboundBytes += len(msg.Data)
 	return nil
 }
 
-func (stats *stats) inbound(s *session.Session, msg *pipeline.Message) error {
+func (stats *Stats) inbound(s *session.Session, msg *pipeline.Message) error {
 	stats.inboundBytes += len(msg.Data)
 	return nil
 }
 
-func (stats *stats) AfterInit() {
-	stats.timer = scheduler.NewTimer(time.Minute, func() {
+func (stats *Stats) AfterInit() {
+	scheduler.Repeat(func() {
 		println("OutboundBytes", stats.outboundBytes)
 		println("InboundBytes", stats.outboundBytes)
-	})
+	}, time.Minute)
+}
+
+func (stats *Stats) Ping(s *session.Session, msg []byte) error {
+	return nil
 }
 
 const (
@@ -93,12 +95,12 @@ func (mgr *RoomManager) AfterInit() {
 		room := s.Value(roomIDKey).(*Room)
 		room.group.Leave(s)
 	})
-	mgr.timer = scheduler.NewTimer(time.Minute, func() {
+	scheduler.Repeat(func() {
 		for roomID, room := range mgr.rooms {
 			println(fmt.Sprintf("UserCount: RoomID=%d, Time=%s, Count=%d",
 				roomID, time.Now().String(), room.group.Count()))
 		}
-	})
+	}, time.Minute)
 }
 
 // Join room
@@ -142,9 +144,10 @@ func main() {
 
 	// traffic stats
 	pip := pipeline.New()
-	var stats = &stats{}
+	var stats = &Stats{}
 	pip.Outbound().PushBack(stats.outbound)
 	pip.Inbound().PushBack(stats.inbound)
+	components.Register(stats)
 
 	nano.Listen(":3250",
 		nano.WithIsWebsocket(true),

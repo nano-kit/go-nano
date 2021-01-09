@@ -209,7 +209,7 @@ func (a *agent) Close() error {
 	case <-a.chDie:
 	default:
 		close(a.chDie)
-		scheduler.PushTask(func() { session.Lifetime.Close(a.session) })
+		scheduler.Run(func() { session.Lifetime.Close(a.session) })
 	}
 
 	return a.conn.Close()

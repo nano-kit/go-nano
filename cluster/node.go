@@ -157,7 +157,7 @@ func (n *Node) Startup() error {
 	}
 
 	n.startMonitor()
-	scheduler.NewTimer(67*time.Second, n.removeStaleSession)
+	scheduler.Repeat(n.removeStaleSession, 67*time.Second)
 	return nil
 }
 
@@ -196,7 +196,7 @@ func (n *Node) initNode() error {
 	// Initialize the gRPC server and register service
 	n.rpcServer = grpc.NewServer()
 	n.rpcClient = newRPCClient()
-	scheduler.NewTimer(61*time.Second, n.shrinkRPCClient)
+	scheduler.Repeat(n.shrinkRPCClient, 61*time.Second)
 	clusterpb.RegisterMemberServer(n.rpcServer, n)
 
 	go func() {
@@ -465,7 +465,7 @@ func (n *Node) SessionClosed(_ context.Context, req *clusterpb.SessionClosedRequ
 	delete(n.sessions, req.SessionId)
 	n.mu.Unlock()
 	if found {
-		scheduler.PushTask(func() { session.Lifetime.Close(s) })
+		scheduler.Run(func() { session.Lifetime.Close(s) })
 	}
 	return &clusterpb.SessionClosedResponse{}, nil
 }

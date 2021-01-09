@@ -36,7 +36,6 @@ var (
 	Heartbeat          time.Duration      // Heartbeat internal
 	Debug              bool               // enable Debug
 	HandshakeValidator func([]byte) error // When you need to verify the custom data of the handshake request
-	TimerPrecision     time.Duration      // TimerPrecision indicates the precision of timer, default is time.Second
 	Serializer         serialize.Serializer
 	GrpcOptions        = []grpc.DialOption{grpc.WithInsecure()}
 )
@@ -44,7 +43,6 @@ var (
 func init() {
 	Die = make(chan bool)
 	Heartbeat = 30 * time.Second
-	TimerPrecision = time.Second
 	HandshakeValidator = func(_ []byte) error { return nil }
 	Serializer = protobuf.NewSerializer()
 }

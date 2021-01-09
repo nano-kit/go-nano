@@ -506,6 +506,6 @@ func (h *LocalHandler) localProcess(handler *component.Handler, lastMid uint64, 
 		}
 		local.Schedule(task)
 	} else {
-		scheduler.PushTask(task)
+		scheduler.Run(task)
 	}
 }

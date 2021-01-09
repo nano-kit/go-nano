@@ -8,7 +8,6 @@ import (
 	"github.com/aclisp/go-nano/benchmark/testdata"
 	"github.com/aclisp/go-nano/cluster"
 	"github.com/aclisp/go-nano/component"
-	"github.com/aclisp/go-nano/scheduler"
 	"github.com/aclisp/go-nano/session"
 	. "github.com/pingcap/check"
 )
@@ -48,9 +47,6 @@ func TestNode(t *testing.T) {
 }
 
 func (s *nodeSuite) TestNodeStartup(c *C) {
-	go scheduler.Sched()
-	defer scheduler.Close()
-
 	masterComps := &component.Components{}
 	masterComps.Register(&MasterComponent{})
 	masterNode := &cluster.Node{

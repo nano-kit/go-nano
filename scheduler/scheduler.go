@@ -22,10 +22,8 @@ package scheduler
 
 import (
 	"runtime/debug"
-	"sync/atomic"
 	"time"
 
-	"github.com/aclisp/go-nano/internal/env"
 	"github.com/aclisp/go-nano/internal/log"
 )
 
@@ -37,60 +35,46 @@ type LocalScheduler interface {
 // Task is a function
 type Task func()
 
-var (
-	chDie   = make(chan struct{})
-	chExit  = make(chan struct{})
-	chTasks = make(chan Task, 1<<8)
-	started int32
-	closed  int32
-)
+// SystemTimedSched is the library level timed-scheduler
+var systemTimedSched *TimedSched = NewTimedSched(1)
 
-func try(f func()) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Printf("handle message panic: %+v\n%s", err, debug.Stack())
-		}
-	}()
-	f()
-}
-
-// Sched runs the scheduler
-func Sched() {
-	if atomic.AddInt32(&started, 1) != 1 {
-		return
-	}
-
-	ticker := time.NewTicker(env.TimerPrecision)
-	defer func() {
-		ticker.Stop()
-		close(chExit)
-	}()
-
-	for {
-		select {
-		case <-ticker.C:
-			cron()
-
-		case f := <-chTasks:
-			try(f)
-
-		case <-chDie:
-			return
-		}
+func try(f Task) Task {
+	return func() {
+		defer func() {
+			if err := recover(); err != nil {
+				log.Printf("handle task panic: %+v\n%s", err, debug.Stack())
+			}
+		}()
+		f()
 	}
 }
 
 // Close stops the scheduler
 func Close() {
-	if atomic.AddInt32(&closed, 1) != 1 {
-		return
-	}
-	close(chDie)
-	<-chExit
+	systemTimedSched.Close()
+	systemTimedSched = nil
 	log.Print("scheduler stopped")
 }
 
-// PushTask add task to scheduler
-func PushTask(task Task) {
-	chTasks <- task
+// Run add task to scheduler for immediate execution
+func Run(task Task) {
+	systemTimedSched.Run(try(task))
+}
+
+type repeatableTask struct {
+	Task
+	interval time.Duration
+}
+
+func (r repeatableTask) run() {
+	now := time.Now()
+	r.Task()
+	systemTimedSched.Put(r.run, now.Add(r.interval))
+}
+
+// Repeat runs the task repeatly at every interval
+func Repeat(task Task, interval time.Duration) {
+	r := repeatableTask{try(task), interval}
+	now := time.Now()
+	systemTimedSched.Put(r.run, now.Add(interval))
 }
