@@ -49,7 +49,12 @@ func (h *timedFuncHeap) Pop() interface{} {
 	return x
 }
 
-// TimedSched represents the control struct for timed parallel scheduler
+// TimedSched represents the control struct for timed parallel scheduler.
+// This scheduler also executes runnable tasks at the same go routine.
+// It is inefficient for programs create and delete timers frequently, because
+// leaving a lot of timers in the heap slows down addtimer.
+// If your program create and delete a lot of short period timers, use a
+// time-wheel mechanism such as https://github.com/andy2046/tik
 type TimedSched struct {
 	// prepending tasks
 	prependTasks    []timedFunc
