@@ -114,3 +114,17 @@ go test -v -tags "benchmark"
 ## License
 
 [MIT License](./LICENSE)
+
+## Fork
+
+This project is a refined version of the [original repo](https://github.com/lonng/nano) made by Lonng.
+It has following critical improvements:
+
+* a new scheduler
+* tidy logging messages
+* various bug fixing
+* renamed some APIs
+* fixed broken demos and docs
+* remove stale sessions
+* shrink rpc client
+* cluster: smarter startup: unregister then retry
