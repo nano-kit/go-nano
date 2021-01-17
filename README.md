@@ -11,27 +11,44 @@ mobile games, etc of all sizes. Nano also contains a simple JavaScript library t
 
 ## How to build a system with `Nano`
 
-#### What does a `Nano` application look like?
+### What does a `Nano` application look like?
 
 The simplest "nano" application as shown in the following figure, you can make powerful applications by combining different components.
 
-![Application](media/application.png)
+```
++-------------+  Response
+| Nano Client <-----------+
+|(Web Browser)|           |
++-------------+           | Request   +-------------+
+                          +----------->             |
++-------------+                       |             |
+| Nano Client <-Persistent Connection-> Nano Server |
+|(Mobile App) |                       | (Components)|
++-------------+           +----------->             |
+                          | Notify    |             |
++-------------+           |           +-------------+
+| Nano Client <-----------+
+|(Desktop App)|   Push
++-------------+
+```
 
-In fact, the `nano` application is a collection of  [Component ](./docs/get_started.md#component) , and a component is a bundle of  [Handler](./docs/get_started.md#handler), once you register a component to nano, nano will register all methods that can be converted to `Handler` to nano service container. Service was accessed by `Component.Handler`, and the handler will be called while client request. The handler will receive two parameters while handling a message:
+In fact, the `nano` application server is a collection of [Component](./docs/get_started.md#component), and a component is a bundle of [Handler](./docs/get_started.md#handler). once you register a component to nano, nano will register all methods that can be converted to `Handler` to nano application server. The handler will be called while client request. The handler will receive two parameters while handling a message:
   - `*session.Session`: corresponding a client that apply this request or notify.
   - `*protocol.FooBar`: the payload of the request.
 
 While you had processed your logic, you can response or push message to the client by `session.Response(payload)` and `session.Push('eventName', payload)`, or returns error when some unexpected data received.
 
-#### How to build distributed system with `Nano`
+See [Get Started](./docs/get_started.md) for more informations.
+
+### How to build distributed system with `Nano`
 
 Nano contains built-in distributed system solution, and make you creating a distributed game server easily.
 
-See: [The distributed chat demo](./examples/cluster)
+See [The distributed chat demo](./examples/cluster)
 
 The Nano will remain simple, but you can perform any operations in the component and get the desired goals. You can startup a group of `Nano` application as agent to dispatch message to backend servers.
 
-#### How to execute the asynchronous task
+### How to execute the asynchronous task
 
 ```go
 func (manager *PlayerManager) Login(s *session.Session, msg *ReqPlayerLogin) error {
@@ -44,7 +61,7 @@ func (manager *PlayerManager) Login(s *session.Session, msg *ReqPlayerLogin) err
     go func() {
         player, err := db.QueryPlayer(msg.PlayerId) // ignore error in demo
         // handle result in main logical gorontine
-        nano.Invoke(func(){ onDBResult(player) })
+        scheduler.Run(func(){ onDBResult(player) })
     }
     return nil
 }
@@ -54,13 +71,13 @@ func (manager *PlayerManager) Login(s *session.Session, msg *ReqPlayerLogin) err
 
 - English
     + [How to build your first nano application](./docs/get_started.md)
-    + [Route compression](./docs/route_compression.md)
     + [Communication protocol](./docs/communication_protocol.md)
+    + [Route compression](./docs/route_compression.md)
 
 - 简体中文
     + [如何构建你的第一个nano应用](./docs/get_started_zh_CN.md)
-    + [路由压缩](./docs/route_compression_zh_CN.md)
     + [通信协议](./docs/communication_protocol_zh_CN.md)
+    + [路由压缩](./docs/route_compression_zh_CN.md)
 
 ## Resources
 
@@ -70,7 +87,7 @@ func (manager *PlayerManager) Login(s *session.Session, msg *ReqPlayerLogin) err
 
 ## Go version
 
-`> go1.14`
+`>= go1.14`
 
 ## Installation
 

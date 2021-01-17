@@ -1,11 +1,18 @@
 # Tadpole
 
-Online chat demo, ref: http://rumpetroll.com/
+Online game demo
 
-## Run demo
+## Required
+
+- golang
+- websocket
+
+## Run
+
 ```shell
-cd examples/demo/tadpole
 go run main.go
 ```
 
 Open browser: http://127.0.0.1:23456/static/
+
+Open at least 2 browsers to see other tadpole.
