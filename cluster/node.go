@@ -38,6 +38,7 @@ import (
 	"github.com/aclisp/go-nano/scheduler"
 	"github.com/aclisp/go-nano/session"
 	"github.com/gorilla/websocket"
+	"golang.org/x/sys/unix"
 	"google.golang.org/grpc"
 )
 
@@ -129,6 +130,7 @@ func (n *Node) Startup() error {
 	}
 
 	cache()
+	n.adjustOpenFilesLimit()
 	if err := n.initNode(); err != nil {
 		return err
 	}
@@ -173,6 +175,69 @@ func (n *Node) waitForGate(timeout time.Duration) {
 			conn.Close()
 		}
 		break
+	}
+}
+
+func (n *Node) adjustOpenFilesLimit() {
+	const (
+		MinReservedFDs = 64
+		MaxClients     = 10000
+	)
+	var (
+		err      error
+		maxfiles uint64 = MaxClients + MinReservedFDs
+		limit    unix.Rlimit
+	)
+
+	if err = unix.Getrlimit(unix.RLIMIT_NOFILE, &limit); err != nil {
+		log.Print("unable to obtain the current NOFILE limit", err)
+		return
+	}
+
+	oldlimit := limit.Cur
+
+	// Set the max number of files if the current limit is not enough for our needs
+	bestlimit := maxfiles
+	for bestlimit > oldlimit {
+		var decrStep uint64 = 16
+
+		limit.Cur = bestlimit
+		limit.Max = bestlimit
+		if err = unix.Setrlimit(unix.RLIMIT_NOFILE, &limit); err == nil {
+			break
+		}
+
+		// We failed to set file limit to 'bestlimit'. Try with a
+		// smaller limit decrementing by a few FDs per iteration.
+		if bestlimit < decrStep {
+			break
+		}
+		bestlimit -= decrStep
+	}
+
+	// Assume that the limit we get initially is still valid if
+	// our last try was even lower.
+	if bestlimit < oldlimit {
+		bestlimit = oldlimit
+	}
+
+	if bestlimit < maxfiles {
+		oldMaxclients := MaxClients
+		maxclients := bestlimit - MinReservedFDs
+		// maxclients is unsigned so may overflow: in order
+		// to check if maxclients is now logically less than 1
+		// we test indirectly via bestlimit.
+		if bestlimit <= MinReservedFDs {
+			log.Fatalf("Your current 'ulimit -n' of %v is not enough for the server to start. "+
+				"Please increase your open file limit to at least %v. Exiting.", oldlimit, maxfiles)
+		}
+		log.Printf("You requested maxclients of %v requiring at least %v max file descriptors.", oldMaxclients, maxfiles)
+		log.Printf("Server can't set maximum open files to %v because of OS error: %v", maxfiles, err)
+		log.Printf("Current maximum open files is %v. "+
+			"maxclients has been reduced to %v to compensate for low ulimit. "+
+			"If you need higher maxclients increase 'ulimit -n'.", bestlimit, maxclients)
+	} else {
+		log.Printf("increased maximum number of open files to %v (it was originally set to %v)", maxfiles, oldlimit)
 	}
 }
 

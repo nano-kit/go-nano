@@ -52,7 +52,6 @@ func try(f Task) Task {
 // Close stops the scheduler
 func Close() {
 	systemTimedSched.Close()
-	systemTimedSched = nil
 	log.Print("scheduler stopped")
 }
 
