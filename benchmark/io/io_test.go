@@ -113,8 +113,7 @@ func TestIO(t *testing.T) {
 
 	var wg sync.WaitGroup
 	for i := 0; i < conc; i++ {
-		wg.Add(1)
-		go client(i, 10*time.Second, &wg)
+		startClient(&wg, i)
 	}
 	done := make(chan struct{})
 	go func() {
@@ -130,4 +129,9 @@ func TestIO(t *testing.T) {
 	}
 
 	t.Log("exit")
+}
+
+func startClient(wg *sync.WaitGroup, index int) {
+	wg.Add(1)
+	go client(index, 10*time.Second, wg)
 }
