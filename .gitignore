@@ -6,6 +6,7 @@
 examples/cluster/cluster
 examples/demo/chat/tmpl
 examples/demo/tadpole/tmpl
+benchmark/io/tmpl
 
 # Test binary, build with `go test -c`
 *.test
