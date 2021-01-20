@@ -3,7 +3,7 @@
 package io
 
 import (
-	"fmt"
+	"math/rand"
 	"os"
 	"os/signal"
 	"sync"
@@ -18,12 +18,10 @@ import (
 	"github.com/aclisp/go-nano/session"
 )
 
-const (
-	addr = "127.0.0.1:13250" // local address
-	conc = 100               // concurrent client count
-)
+const addr = "127.0.0.1:13250" // local address
 
-//
+var conc int32 // concurrent client count
+
 type TestHandler struct {
 	component.Base
 	metrics int32
@@ -35,7 +33,7 @@ func (h *TestHandler) AfterInit() {
 	// metrics output ticker
 	go func() {
 		for range ticker.C {
-			println("QPS", atomic.LoadInt32(&h.metrics))
+			println("QPS", atomic.LoadInt32(&h.metrics), "CLIENT", atomic.LoadInt32(&conc))
 			atomic.StoreInt32(&h.metrics, 0)
 		}
 	}()
@@ -45,7 +43,7 @@ func (h *TestHandler) Ping(s *session.Session, data *testdata.Ping) error {
 	atomic.AddInt32(&h.metrics, 1)
 	return s.Push("pong",
 		&testdata.Pong{
-			Content:  data.Content,
+			Content:  data.Content + data.Content + data.Content,
 			Sequence: data.Sequence + 1,
 		})
 }
@@ -60,7 +58,9 @@ func server() {
 }
 
 func client(id int, ttl time.Duration, done *sync.WaitGroup) {
+	atomic.AddInt32(&conc, 1)
 	c := NewConnector()
+	rnd := rand.New(rand.NewSource(1))
 	ready := make(chan struct{})
 	pingSeq := int64(-1) // ping sequence is 1,3,5,7,...
 	pongSeq := int64(0)  // pong sequence should be 2,4,6,8,...
@@ -89,9 +89,11 @@ LOOP:
 			break LOOP
 		default:
 			pingSeq += 2
+			contentLen := 4 + rnd.Intn(61)
+			content := RandString(contentLen, rnd)
 			if err := c.Notify("TestHandler.Ping",
 				&testdata.Ping{
-					Content:  "hello",
+					Content:  content,
 					Sequence: pingSeq,
 				}); err != nil {
 				panic(err)
@@ -100,11 +102,13 @@ LOOP:
 		}
 	}
 
-	fmt.Printf("client %v done with ping_seq=%v pong_seq=%v\n", id, pingSeq, pongSeq)
+	//fmt.Printf("client %v done with ping_seq=%v pong_seq=%v\n", id, pingSeq, pongSeq)
+	_ = pongSeq
 	done.Done()
+	atomic.AddInt32(&conc, -1)
 }
 
-func TestIO(t *testing.T) {
+func TestBenchmark(t *testing.T) {
 	go server()
 
 	// wait server startup
@@ -112,9 +116,7 @@ func TestIO(t *testing.T) {
 	t.Log("server started")
 
 	var wg sync.WaitGroup
-	for i := 0; i < conc; i++ {
-		startClient(&wg, i)
-	}
+	generateClients(&wg)
 	done := make(chan struct{})
 	go func() {
 		wg.Wait()
@@ -134,4 +136,18 @@ func TestIO(t *testing.T) {
 func startClient(wg *sync.WaitGroup, index int) {
 	wg.Add(1)
 	go client(index, 10*time.Second, wg)
+}
+
+func generateClients(wg *sync.WaitGroup) {
+	index := 0
+	startClient(wg, index)
+	go func() {
+		src := rand.New(rand.NewSource(1))
+		interval := Exponential{Rate: 2, Src: src}
+		for {
+			time.Sleep(time.Duration(interval.Rand()*1000) * time.Millisecond)
+			index++
+			startClient(wg, index)
+		}
+	}()
 }

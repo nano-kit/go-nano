@@ -241,7 +241,7 @@ func (c *Connector) read() {
 	for {
 		n, err := c.conn.Read(buf)
 		if err != nil {
-			log.Print(err.Error())
+			//log.Print(err.Error())
 			c.Close()
 			return
 		}

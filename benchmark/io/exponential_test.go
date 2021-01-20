@@ -19,6 +19,13 @@ func TestBasic(t *testing.T) {
 	}
 }
 
+func TestRandString(t *testing.T) {
+	src := rand.New(rand.NewSource(1))
+	for i := 0; i < 10; i++ {
+		t.Log(RandString(5, src))
+	}
+}
+
 func TestExponential(t *testing.T) {
 	t.Parallel()
 	src := rand.New(rand.NewSource(1))
@@ -33,9 +40,8 @@ func TestExponential(t *testing.T) {
 
 func testExponential(t *testing.T, dist Exponential, i int) {
 	const (
-		tol  = 1e-2
-		n    = 3e6
-		bins = 50
+		tol = 1e-2
+		n   = 3e6
 	)
 	x := make([]float64, n)
 	generateSamples(x, dist)
