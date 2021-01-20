@@ -2,9 +2,11 @@ syntax = "proto3";
 package testdata;
 
 message Ping {
-    string Content = 1;
+    string content = 1;
+    int64 sequence = 2;
 }
 
 message Pong {
-    string Content = 2;
+    string content = 1;
+    int64 sequence = 2;
 }

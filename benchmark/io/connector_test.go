@@ -33,6 +33,7 @@ func runServer(addr string) {
 }
 
 func waitFor(addr string, timeout time.Duration) (err error) {
+	time.Sleep(10 * time.Millisecond)
 	begin := time.Now()
 	for time.Since(begin) < timeout {
 		var conn net.Conn
