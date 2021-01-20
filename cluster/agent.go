@@ -194,10 +194,9 @@ func (a *agent) ResponseMid(mid uint64, v interface{}) error {
 // Close closes the agent, clean inner state and close low-level connection.
 // Any blocked Read or Write operations will be unblocked and return errors.
 func (a *agent) Close() error {
-	if a.status() == statusClosed {
+	if a.setStatus(statusClosed) == statusClosed {
 		return ErrCloseClosedSession
 	}
-	a.setStatus(statusClosed)
 
 	if env.Debug {
 		log.Printf("session closed, ID=%d, UID=%d, IP=%s",
@@ -230,8 +229,8 @@ func (a *agent) status() int32 {
 	return atomic.LoadInt32(&a.state)
 }
 
-func (a *agent) setStatus(state int32) {
-	atomic.StoreInt32(&a.state, state)
+func (a *agent) setStatus(state int32) (oldstate int32) {
+	return atomic.SwapInt32(&a.state, state)
 }
 
 func (a *agent) write() {

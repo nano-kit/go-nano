@@ -22,6 +22,7 @@ package io
 
 import (
 	"net"
+	"strings"
 	"sync"
 
 	"github.com/aclisp/go-nano/internal/codec"
@@ -57,11 +58,12 @@ type (
 
 	// Connector is a tiny Nano client
 	Connector struct {
-		conn   net.Conn       // low-level connection
-		codec  *codec.Decoder // decoder
-		die    chan struct{}  // connector close channel
-		chSend chan []byte    // send queue
-		mid    uint64         // message id
+		conn    net.Conn       // low-level connection
+		codec   *codec.Decoder // decoder
+		dieOnce sync.Once
+		die     chan struct{} // connector close channel
+		chSend  chan []byte   // send queue
+		mid     uint64        // message id
 
 		// events handler
 		muEvents sync.RWMutex
@@ -160,13 +162,15 @@ func (c *Connector) On(event string, callback Callback) {
 
 // Close close the connection, and shutdown the benchmark
 func (c *Connector) Close() {
-	c.conn.Close()
-	// prevent closing closed channel
-	select {
-	case <-c.die:
-	default:
-		close(c.die)
-	}
+	c.dieOnce.Do(func() {
+		c.conn.Close()
+		// prevent closing closed channel
+		select {
+		case <-c.die:
+		default:
+			close(c.die)
+		}
+	})
 }
 
 func (c *Connector) eventHandler(event string) (Callback, bool) {
@@ -241,7 +245,12 @@ func (c *Connector) read() {
 	for {
 		n, err := c.conn.Read(buf)
 		if err != nil {
-			//log.Print(err.Error())
+			str := err.Error()
+			if strings.Contains(str, "use of closed network connection") {
+				// active closing
+			} else {
+				log.Print(str)
+			}
 			c.Close()
 			return
 		}

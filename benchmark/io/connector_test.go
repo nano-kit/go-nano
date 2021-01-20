@@ -29,7 +29,7 @@ func (h *Server) PingPong(s *session.Session, data *testdata.Ping) error {
 func runServer(addr string) {
 	components := &component.Components{}
 	components.Register(&Server{})
-	nano.Listen(addr, nano.WithComponents(components))
+	nano.Listen(addr, nano.WithComponents(components), nano.WithDebugMode())
 }
 
 func waitFor(addr string, timeout time.Duration) (err error) {
