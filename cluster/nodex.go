@@ -26,6 +26,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/pprof"
+	"runtime"
 	"sort"
 	"strconv"
 	"time"
@@ -34,6 +35,16 @@ import (
 	"github.com/aclisp/go-nano/internal/log"
 	"github.com/aclisp/go-nano/session"
 )
+
+func gomaxprocs() interface{} {
+	return runtime.GOMAXPROCS(0)
+}
+
+func publishvar(name string, f func() interface{}) {
+	if expvar.Get(name) == nil {
+		expvar.Publish(name, expvar.Func(f))
+	}
+}
 
 func (n *Node) startMonitor() {
 	if n.MonitorAddr == "" {
@@ -52,6 +63,7 @@ func (n *Node) startMonitor() {
 	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	mux.Handle("/debug/vars", expvar.Handler())
 	mux.HandleFunc("/debug/nano/node", n.nodeInfo)
+	publishvar("gomaxprocs", gomaxprocs)
 
 	go func() {
 		if len(n.TSLCertificate) != 0 {

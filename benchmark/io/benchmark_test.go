@@ -135,7 +135,7 @@ func TestBenchmark(t *testing.T) {
 
 func startClient(wg *sync.WaitGroup, index int) {
 	wg.Add(1)
-	go client(index, 10*time.Second, wg)
+	go client(index, 50*time.Second, wg)
 }
 
 func generateClients(wg *sync.WaitGroup) {
