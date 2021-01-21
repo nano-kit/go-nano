@@ -64,6 +64,7 @@ func client(id int, ttl time.Duration, done *sync.WaitGroup) {
 	ready := make(chan struct{})
 	pingSeq := int64(-1) // ping sequence is 1,3,5,7,...
 	pongSeq := int64(0)  // pong sequence should be 2,4,6,8,...
+	pongContent := ""
 	quit := time.After(ttl)
 
 	c.OnConnected(func() {
@@ -75,6 +76,7 @@ func client(id int, ttl time.Duration, done *sync.WaitGroup) {
 			panic(err)
 		}
 		pongSeq = res.Sequence
+		pongContent = res.Content
 	})
 	if err := c.Start(addr); err != nil {
 		panic(err)
@@ -102,8 +104,8 @@ LOOP:
 		}
 	}
 
-	//fmt.Printf("client %v done with ping_seq=%v pong_seq=%v\n", id, pingSeq, pongSeq)
-	_ = pongSeq
+	//fmt.Printf("client %v done with ping_seq=%v pong_seq=%v content=%v\n", id, pingSeq, pongSeq, pongContent)
+	_, _ = pongSeq, pongContent
 	done.Done()
 	atomic.AddInt32(&conc, -1)
 }
