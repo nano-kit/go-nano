@@ -128,6 +128,18 @@ func Encode(typ packet.Type, data []byte) ([]byte, error) {
 	return buf, nil
 }
 
+// EncodeHeader create a packet.Packet header from the raw bytes slice and then encode to network bytes slice
+func EncodeHeader(typ packet.Type, length int) ([]byte, error) {
+	if typ < packet.Handshake || typ > packet.Kick {
+		return nil, packet.ErrWrongPacketType
+	}
+
+	buf := make([]byte, HeadLength)
+	buf[0] = byte(typ)
+	copy(buf[1:HeadLength], intToBytes(length))
+	return buf, nil
+}
+
 // Decode packet data length byte to int(Big end)
 func bytesToInt(b []byte) int {
 	result := 0

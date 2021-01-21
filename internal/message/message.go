@@ -95,6 +95,11 @@ func (m *Message) Encode() ([]byte, error) {
 	return Encode(m)
 }
 
+// EncodeHeader marshals message header to binary format.
+func (m *Message) EncodeHeader() ([]byte, error) {
+	return EncodeHeader(m)
+}
+
 func routable(t Type) bool {
 	return t == Request || t == Notify || t == Push
 }
@@ -118,6 +123,16 @@ func invalidType(t Type) bool {
 // The figure above indicates that the bit does not affect the type of message.
 // See ref: https://github.com/aclisp/go-nano/blob/master/docs/communication_protocol.md
 func Encode(m *Message) ([]byte, error) {
+	buf, err := EncodeHeader(m)
+	if err != nil {
+		return nil, err
+	}
+	buf = append(buf, m.Data...)
+	return buf, nil
+}
+
+// EncodeHeader marshals message header to binary format.
+func EncodeHeader(m *Message) ([]byte, error) {
 	if invalidType(m.Type) {
 		return nil, ErrWrongMessageType
 	}
@@ -156,7 +171,6 @@ func Encode(m *Message) ([]byte, error) {
 		}
 	}
 
-	buf = append(buf, m.Data...)
 	return buf, nil
 }
 

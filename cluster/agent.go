@@ -246,7 +246,6 @@ func (a *agent) write() {
 	}()
 
 	for {
-		var buf []byte
 		select {
 		case <-ticker.C:
 			deadline := time.Now().Add(-2 * env.Heartbeat).Unix()
@@ -254,7 +253,12 @@ func (a *agent) write() {
 				log.Printf("session heartbeat timeout, LastTime=%d, Deadline=%d", atomic.LoadInt64(&a.lastAt), deadline)
 				return
 			}
-			buf = hbd
+
+			// close agent while low-level conn broken
+			if _, err := a.conn.Write(hbd); err != nil {
+				log.Print(err.Error())
+				return
+			}
 
 		case data := <-a.chSend:
 			payload, err := message.Serialize(data.payload)
@@ -283,29 +287,33 @@ func (a *agent) write() {
 				}
 			}
 
-			em, err := m.Encode()
+			// buff is packet header + message header + payload
+			var buff [3][]byte
+			b := net.Buffers(buff[:])
+			b[2] = payload
+			b[1], err = m.EncodeHeader()
 			if err != nil {
 				log.Print(err.Error())
 				break
 			}
 
 			// packet encode
-			p, err := codec.Encode(packet.Data, em)
+			b[0], err = codec.EncodeHeader(packet.Data, len(b[1])+len(b[2]))
 			if err != nil {
 				log.Print(err)
 				break
 			}
-			buf = p
+
+			// close agent while low-level conn broken
+			if _, err := b.WriteTo(a.conn); err != nil {
+				log.Print(err.Error())
+				return
+			}
 
 		case <-a.chDie: // agent closed signal
 			return
 
 		case <-env.Die: // application quit
-			return
-		}
-		// close agent while low-level conn broken
-		if _, err := a.conn.Write(buf); err != nil {
-			log.Print(err.Error())
 			return
 		}
 	}

@@ -123,6 +123,7 @@ It has following critical improvements:
 * a new scheduler
 * tidy logging messages
 * various bug fixing
+* [writev](https://github.com/golang/go/issues/13451) for agent.write
 * renamed some APIs
 * fixed broken demos and docs
 * remove stale sessions
