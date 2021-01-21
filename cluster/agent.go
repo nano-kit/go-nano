@@ -290,7 +290,7 @@ func (a *agent) write() {
 			// buff is packet header + message header + payload
 			var buff [3][]byte
 			b := net.Buffers(buff[:])
-			b[2] = payload
+			b[2] = m.Data
 			b[1], err = m.EncodeHeader()
 			if err != nil {
 				log.Print(err.Error())
