@@ -107,7 +107,7 @@ func (c *Decoder) Decode(data []byte) ([]*packet.Packet, error) {
 	return packets, nil
 }
 
-// Encode create a packet.Packet from  the raw bytes slice and then encode to network bytes slice
+// Encode create a packet.Packet from the raw bytes slice and then encode to network bytes slice
 // Protocol refs: https://github.com/NetEase/pomelo/wiki/Communication-Protocol
 //
 // -<type>-|--------<length>--------|-<data>-

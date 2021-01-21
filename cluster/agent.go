@@ -235,12 +235,10 @@ func (a *agent) setStatus(state int32) (oldstate int32) {
 
 func (a *agent) write() {
 	ticker := time.NewTicker(env.Heartbeat)
-	chWrite := make(chan []byte, agentWriteBacklog)
 	// clean func
 	defer func() {
 		ticker.Stop()
 		close(a.chSend)
-		close(chWrite)
 		a.Close()
 		if env.Debug {
 			log.Printf("session write goroutine exit, SessionID=%d, UID=%d", a.session.ID(), a.session.UID())
@@ -248,6 +246,7 @@ func (a *agent) write() {
 	}()
 
 	for {
+		var buf []byte
 		select {
 		case <-ticker.C:
 			deadline := time.Now().Add(-2 * env.Heartbeat).Unix()
@@ -255,14 +254,7 @@ func (a *agent) write() {
 				log.Printf("session heartbeat timeout, LastTime=%d, Deadline=%d", atomic.LoadInt64(&a.lastAt), deadline)
 				return
 			}
-			chWrite <- hbd
-
-		case data := <-chWrite:
-			// close agent while low-level conn broken
-			if _, err := a.conn.Write(data); err != nil {
-				log.Print(err.Error())
-				return
-			}
+			buf = hbd
 
 		case data := <-a.chSend:
 			payload, err := message.Serialize(data.payload)
@@ -303,12 +295,17 @@ func (a *agent) write() {
 				log.Print(err)
 				break
 			}
-			chWrite <- p
+			buf = p
 
 		case <-a.chDie: // agent closed signal
 			return
 
 		case <-env.Die: // application quit
+			return
+		}
+		// close agent while low-level conn broken
+		if _, err := a.conn.Write(buf); err != nil {
+			log.Print(err.Error())
 			return
 		}
 	}
