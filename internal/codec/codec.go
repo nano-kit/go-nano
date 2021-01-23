@@ -24,7 +24,7 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/aclisp/go-nano/internal/packet"
+	"github.com/nano-kit/go-nano/internal/packet"
 )
 
 // Codec constants.

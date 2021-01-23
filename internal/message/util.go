@@ -20,7 +20,7 @@
 
 package message
 
-import "github.com/aclisp/go-nano/internal/env"
+import "github.com/nano-kit/go-nano/internal/env"
 
 // Serialize serializes the message
 func Serialize(v interface{}) ([]byte, error) {

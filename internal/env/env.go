@@ -25,8 +25,8 @@ package env
 import (
 	"time"
 
-	"github.com/aclisp/go-nano/serialize"
-	"github.com/aclisp/go-nano/serialize/protobuf"
+	"github.com/nano-kit/go-nano/serialize"
+	"github.com/nano-kit/go-nano/serialize/protobuf"
 	"google.golang.org/grpc"
 )
 

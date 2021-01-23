@@ -3,7 +3,7 @@ package protobuf
 import (
 	"testing"
 
-	"github.com/aclisp/go-nano/benchmark/testdata"
+	"github.com/nano-kit/go-nano/benchmark/testdata"
 )
 
 func TestProtobufSerialezer_Serialize(t *testing.T) {

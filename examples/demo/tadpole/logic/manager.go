@@ -3,9 +3,9 @@ package logic
 import (
 	"log"
 
-	"github.com/aclisp/go-nano/component"
-	"github.com/aclisp/go-nano/examples/demo/tadpole/logic/protocol"
-	"github.com/aclisp/go-nano/session"
+	"github.com/nano-kit/go-nano/component"
+	"github.com/nano-kit/go-nano/examples/demo/tadpole/logic/protocol"
+	"github.com/nano-kit/go-nano/session"
 )
 
 // Manager component

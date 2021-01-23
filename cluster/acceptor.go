@@ -4,9 +4,9 @@ import (
 	"context"
 	"net"
 
-	"github.com/aclisp/go-nano/cluster/clusterpb"
-	"github.com/aclisp/go-nano/internal/message"
-	"github.com/aclisp/go-nano/session"
+	"github.com/nano-kit/go-nano/cluster/clusterpb"
+	"github.com/nano-kit/go-nano/internal/message"
+	"github.com/nano-kit/go-nano/session"
 )
 
 type acceptor struct {

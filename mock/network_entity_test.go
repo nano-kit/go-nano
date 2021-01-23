@@ -23,7 +23,7 @@ package mock_test
 import (
 	"testing"
 
-	"github.com/aclisp/go-nano/mock"
+	"github.com/nano-kit/go-nano/mock"
 	. "github.com/pingcap/check"
 )
 

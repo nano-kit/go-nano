@@ -3,8 +3,8 @@ package pipeline
 import (
 	"sync"
 
-	"github.com/aclisp/go-nano/internal/message"
-	"github.com/aclisp/go-nano/session"
+	"github.com/nano-kit/go-nano/internal/message"
+	"github.com/nano-kit/go-nano/session"
 )
 
 type (

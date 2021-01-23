@@ -26,7 +26,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aclisp/go-nano/internal/log"
+	"github.com/nano-kit/go-nano/internal/log"
 )
 
 // Type represents the type of message, which could be Request/Notify/Response/Push
@@ -121,7 +121,7 @@ func invalidType(t Type) bool {
 // | push     |----011-|<route>             |
 // ------------------------------------------
 // The figure above indicates that the bit does not affect the type of message.
-// See ref: https://github.com/aclisp/go-nano/blob/master/docs/communication_protocol.md
+// See ref: https://github.com/nano-kit/go-nano/blob/master/docs/communication_protocol.md
 func Encode(m *Message) ([]byte, error) {
 	buf, err := EncodeHeader(m)
 	if err != nil {
@@ -175,7 +175,7 @@ func EncodeHeader(m *Message) ([]byte, error) {
 }
 
 // Decode unmarshal the bytes slice to a message
-// See ref: https://github.com/aclisp/go-nano/blob/master/docs/communication_protocol.md
+// See ref: https://github.com/nano-kit/go-nano/blob/master/docs/communication_protocol.md
 func Decode(data []byte) (*Message, error) {
 	if len(data) < msgHeadLength {
 		return nil, ErrInvalidMessage

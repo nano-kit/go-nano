@@ -1,4 +1,4 @@
-module github.com/aclisp/go-nano
+module github.com/nano-kit/go-nano
 
 go 1.14
 

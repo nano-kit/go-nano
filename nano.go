@@ -29,10 +29,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/aclisp/go-nano/cluster"
-	"github.com/aclisp/go-nano/internal/env"
-	"github.com/aclisp/go-nano/internal/log"
-	"github.com/aclisp/go-nano/scheduler"
+	"github.com/nano-kit/go-nano/cluster"
+	"github.com/nano-kit/go-nano/internal/env"
+	"github.com/nano-kit/go-nano/internal/log"
+	"github.com/nano-kit/go-nano/scheduler"
 )
 
 var running int32

@@ -1,6 +1,6 @@
 package gate
 
-import "github.com/aclisp/go-nano/component"
+import "github.com/nano-kit/go-nano/component"
 
 var (
 	// Services in master server

@@ -4,9 +4,9 @@ import (
 	"log"
 	"strings"
 
-	"github.com/aclisp/go-nano/component"
-	"github.com/aclisp/go-nano/examples/cluster/protocol"
-	"github.com/aclisp/go-nano/session"
+	"github.com/nano-kit/go-nano/component"
+	"github.com/nano-kit/go-nano/examples/cluster/protocol"
+	"github.com/nano-kit/go-nano/session"
 	"github.com/pingcap/errors"
 )
 

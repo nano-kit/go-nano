@@ -1,8 +1,8 @@
 package master
 
 import (
-	"github.com/aclisp/go-nano/component"
-	"github.com/aclisp/go-nano/session"
+	"github.com/nano-kit/go-nano/component"
+	"github.com/nano-kit/go-nano/session"
 )
 
 var (

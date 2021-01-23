@@ -20,7 +20,7 @@ discussed in detail.
 - Since nano is based on Go, so we hope you have some familiarity with Go before reading this
 tutorial.
 
-- The tutorial examples' source code is on github, [complete code](https://github.com/aclisp/go-nano/tree/master/examples/demo/chat)
+- The tutorial examples' source code is on github, [complete code](https://github.com/nano-kit/go-nano/tree/master/examples/demo/chat)
 
 - This tutorial uses a real-time chat application as an example, and we make some modifications
 of the example to show different features of nano, allowing users to have a general understanding
@@ -114,10 +114,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/aclisp/go-nano/nano"
-	"github.com/aclisp/go-nano/component"
-	"github.com/aclisp/go-nano/serialize/json"
-	"github.com/aclisp/go-nano/session"
+	"github.com/nano-kit/go-nano/nano"
+	"github.com/nano-kit/go-nano/component"
+	"github.com/nano-kit/go-nano/serialize/json"
+	"github.com/nano-kit/go-nano/session"
 )
 
 type (

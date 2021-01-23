@@ -25,11 +25,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/aclisp/go-nano/internal/codec"
-	"github.com/aclisp/go-nano/internal/log"
-	"github.com/aclisp/go-nano/internal/message"
-	"github.com/aclisp/go-nano/internal/packet"
 	"github.com/golang/protobuf/proto" //lint:ignore SA1019 keep using this old version of protobuf
+	"github.com/nano-kit/go-nano/internal/codec"
+	"github.com/nano-kit/go-nano/internal/log"
+	"github.com/nano-kit/go-nano/internal/message"
+	"github.com/nano-kit/go-nano/internal/packet"
 )
 
 var (

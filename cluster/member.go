@@ -20,7 +20,7 @@
 
 package cluster
 
-import "github.com/aclisp/go-nano/cluster/clusterpb"
+import "github.com/nano-kit/go-nano/cluster/clusterpb"
 
 // Member is the remote component managed by cluster
 type Member struct {

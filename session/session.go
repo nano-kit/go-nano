@@ -27,7 +27,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/aclisp/go-nano/service"
+	"github.com/nano-kit/go-nano/service"
 )
 
 // NetworkEntity represent low-level network instance

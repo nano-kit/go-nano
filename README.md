@@ -92,7 +92,7 @@ func (manager *PlayerManager) Login(s *session.Session, msg *ReqPlayerLogin) err
 ## Installation
 
 ```shell
-go get github.com/aclisp/go-nano
+go get github.com/nano-kit/go-nano
 
 # dependencies
 go get -u github.com/golang/protobuf

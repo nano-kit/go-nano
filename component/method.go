@@ -25,7 +25,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/aclisp/go-nano/session"
+	"github.com/nano-kit/go-nano/session"
 )
 
 var (

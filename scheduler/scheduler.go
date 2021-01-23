@@ -24,7 +24,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/aclisp/go-nano/internal/log"
+	"github.com/nano-kit/go-nano/internal/log"
 )
 
 // LocalScheduler schedules task to a customized goroutine

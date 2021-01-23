@@ -11,4 +11,4 @@ Before asking a question, make sure you have:
 
 - Searched existing Stack Overflow questions.
 - Googled your question.
-- Searched open and closed [GitHub issues](https://github.com/aclisp/go-nano/issues?q=is%3Aissue)
+- Searched open and closed [GitHub issues](https://github.com/nano-kit/go-nano/issues?q=is%3Aissue)
