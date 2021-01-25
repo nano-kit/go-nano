@@ -287,25 +287,7 @@ func (a *agent) write() {
 				}
 			}
 
-			// buff is packet header + message header + payload
-			var buff [3][]byte
-			b := net.Buffers(buff[:])
-			b[2] = m.Data
-			b[1], err = m.EncodeHeader()
-			if err != nil {
-				log.Print(err.Error())
-				break
-			}
-
-			// packet encode
-			b[0], err = codec.EncodeHeader(packet.Data, len(b[1])+len(b[2]))
-			if err != nil {
-				log.Print(err)
-				break
-			}
-
-			// close agent while low-level conn broken
-			if _, err := b.WriteTo(a.conn); err != nil {
+			if err := a.writeMessage(m); err != nil {
 				log.Print(err.Error())
 				return
 			}
@@ -317,6 +299,56 @@ func (a *agent) write() {
 			return
 		}
 	}
+}
+
+// writeMessage supports a "writev"-like batch write optimization
+func (a *agent) writeMessage(m *message.Message) (err error) {
+	if _, ok := a.conn.(*wsConn); ok {
+		return a.writeMessageWS(m)
+	}
+
+	// buff is packet header + message header + payload
+	var buff [3][]byte
+	b := net.Buffers(buff[:])
+	b[2] = m.Data
+	b[1], err = m.EncodeHeader()
+	if err != nil {
+		return err
+	}
+
+	// packet encode
+	b[0], err = codec.EncodeHeader(packet.Data, len(b[1])+len(b[2]))
+	if err != nil {
+		return err
+	}
+
+	// close agent while low-level conn broken
+	if _, err = b.WriteTo(a.conn); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// writeMessageWS converts m to bytes and writes to web socket.
+func (a *agent) writeMessageWS(m *message.Message) error {
+	em, err := m.Encode()
+	if err != nil {
+		return err
+	}
+
+	// packet encode
+	p, err := codec.Encode(packet.Data, em)
+	if err != nil {
+		return err
+	}
+
+	// close agent while low-level conn broken
+	if _, err := a.conn.Write(p); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a *agent) notifySessionClosed(rpcClient *rpcClient, members []string) {
