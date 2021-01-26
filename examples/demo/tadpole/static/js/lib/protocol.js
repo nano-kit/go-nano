@@ -10,6 +10,8 @@
   var MSG_ROUTE_CODE_MAX = 0xffff;
 
   var MSG_COMPRESS_ROUTE_MASK = 0x1;
+  var MSG_COMPRESS_GZIP_MASK = 0x1;
+  var MSG_COMPRESS_GZIP_ENCODE_MASK = 1 << 4;
   var MSG_TYPE_MASK = 0x7;
 
   var Package = Protocol.Package = {};
@@ -26,6 +28,64 @@
   Message.TYPE_RESPONSE = 2;
   Message.TYPE_PUSH = 3;
 
+  var google = {
+    stringToUtf8ByteArray: function(str) {
+      // TODO(user): Use native implementations if/when available
+      var out = [], p = 0;
+      for (var i = 0; i < str.length; i++) {
+        var c = str.charCodeAt(i);
+        if (c < 128) {
+          out[p++] = c;
+        } else if (c < 2048) {
+          out[p++] = (c >> 6) | 192;
+          out[p++] = (c & 63) | 128;
+        } else if (
+            ((c & 0xFC00) == 0xD800) && (i + 1) < str.length &&
+            ((str.charCodeAt(i + 1) & 0xFC00) == 0xDC00)) {
+          // Surrogate Pair
+          c = 0x10000 + ((c & 0x03FF) << 10) + (str.charCodeAt(++i) & 0x03FF);
+          out[p++] = (c >> 18) | 240;
+          out[p++] = ((c >> 12) & 63) | 128;
+          out[p++] = ((c >> 6) & 63) | 128;
+          out[p++] = (c & 63) | 128;
+        } else {
+          out[p++] = (c >> 12) | 224;
+          out[p++] = ((c >> 6) & 63) | 128;
+          out[p++] = (c & 63) | 128;
+        }
+      }
+      return out;
+    },
+    utf8ByteArrayToString: function(bytes) {
+      // TODO(user): Use native implementations if/when available
+      var out = [], pos = 0, c = 0;
+      while (pos < bytes.length) {
+        var c1 = bytes[pos++];
+        if (c1 < 128) {
+          out[c++] = String.fromCharCode(c1);
+        } else if (c1 > 191 && c1 < 224) {
+          var c2 = bytes[pos++];
+          out[c++] = String.fromCharCode((c1 & 31) << 6 | c2 & 63);
+        } else if (c1 > 239 && c1 < 365) {
+          // Surrogate Pair
+          var c2 = bytes[pos++];
+          var c3 = bytes[pos++];
+          var c4 = bytes[pos++];
+          var u = ((c1 & 7) << 18 | (c2 & 63) << 12 | (c3 & 63) << 6 | c4 & 63) -
+              0x10000;
+          out[c++] = String.fromCharCode(0xD800 + (u >> 10));
+          out[c++] = String.fromCharCode(0xDC00 + (u & 1023));
+        } else {
+          var c2 = bytes[pos++];
+          var c3 = bytes[pos++];
+          out[c++] =
+              String.fromCharCode((c1 & 15) << 12 | (c2 & 63) << 6 | c3 & 63);
+        }
+      }
+      return out.join('');
+    }
+  };
+
   /**
    * pomele client encode
    * id message id;
@@ -34,26 +94,12 @@
    * socketio current support string
    */
   Protocol.strencode = function(str) {
-    var byteArray = new ByteArray(str.length * 3);
-    var offset = 0;
-    for(var i = 0; i < str.length; i++){
-      var charCode = str.charCodeAt(i);
-      var codes = null;
-      if(charCode <= 0x7f){
-        codes = [charCode];
-      }else if(charCode <= 0x7ff){
-        codes = [0xc0|(charCode>>6), 0x80|(charCode & 0x3f)];
-      }else{
-        codes = [0xe0|(charCode>>12), 0x80|((charCode & 0xfc0)>>6), 0x80|(charCode & 0x3f)];
-      }
-      for(var j = 0; j < codes.length; j++){
-        byteArray[offset] = codes[j];
-        ++offset;
-      }
+    if(typeof Buffer !== "undefined" && ByteArray === Buffer) {
+      // encoding defaults to 'utf8'
+      return (new Buffer(str));
+    } else {
+      return google.stringToUtf8ByteArray(str);
     }
-    var _buffer = new ByteArray(offset);
-    copyArray(_buffer, 0, byteArray, 0, offset);
-    return _buffer;
   };
 
   /**
@@ -62,25 +108,13 @@
    * return Message Object
    */
   Protocol.strdecode = function(buffer) {
-    var bytes = new ByteArray(buffer);
-    var array = [];
-    var offset = 0;
-    var charCode = 0;
-    var end = bytes.length;
-    while(offset < end){
-      if(bytes[offset] < 128){
-        charCode = bytes[offset];
-        offset += 1;
-      }else if(bytes[offset] < 224){
-        charCode = ((bytes[offset] & 0x3f)<<6) + (bytes[offset+1] & 0x3f);
-        offset += 2;
-      }else{
-        charCode = ((bytes[offset] & 0x0f)<<12) + ((bytes[offset+1] & 0x3f)<<6) + (bytes[offset+2] & 0x3f);
-        offset += 3;
-      }
-      array.push(charCode);
+    if(typeof Buffer !== "undefined" && ByteArray === Buffer) {
+      // encoding defaults to 'utf8'
+      return buffer.toString();
+    } else {
+      var bytes = new ByteArray(buffer);
+      return google.utf8ByteArrayToString(bytes);
     }
-    return String.fromCharCode.apply(null, array);
   };
 
   /**
@@ -135,7 +169,9 @@
       var type = bytes[offset++];
       length = ((bytes[offset++]) << 16 | (bytes[offset++]) << 8 | bytes[offset++]) >>> 0;
       var body = length ? new ByteArray(length) : null;
-      copyArray(body, 0, bytes, offset, length);
+      if(body) {
+        copyArray(body, 0, bytes, offset, length);
+      }
       offset += length;
       rs.push({'type': type, 'body': body});
     }
@@ -152,7 +188,7 @@
    * @param  {Buffer} msg           message body bytes
    * @return {Buffer}               encode result
    */
-  Message.encode = function(id, type, compressRoute, route, msg){
+  Message.encode = function(id, type, compressRoute, route, msg, compressGzip){
     // caculate message max length
     var idBytes = msgHasId(type) ? caculateMsgIdBytes(id) : 0;
     var msgLen = MSG_FLAG_BYTES + idBytes;
@@ -183,7 +219,7 @@
     var offset = 0;
 
     // add flag
-    offset = encodeMsgFlag(type, compressRoute, buffer, offset);
+    offset = encodeMsgFlag(type, compressRoute, buffer, offset, compressGzip);
 
     // add message id
     if(msgHasId(type)) {
@@ -220,14 +256,15 @@
     var flag = bytes[offset++];
     var compressRoute = flag & MSG_COMPRESS_ROUTE_MASK;
     var type = (flag >> 1) & MSG_TYPE_MASK;
+    var compressGzip = (flag >> 4) & MSG_COMPRESS_GZIP_MASK;
 
     // parse id
     if(msgHasId(type)) {
-      var m = parseInt(bytes[offset]);
+      var m = 0;
       var i = 0;
       do{
-        var m = parseInt(bytes[offset]);
-        id = id + ((m & 0x7f) * Math.pow(2,(7*i)));
+        m = parseInt(bytes[offset]);
+        id += (m & 0x7f) << (7 * i);
         offset++;
         i++;
       }while(m >= 128);
@@ -257,7 +294,7 @@
     copyArray(body, 0, bytes, offset, bodyLen);
 
     return {'id': id, 'type': type, 'compressRoute': compressRoute,
-            'route': route, 'body': body};
+            'route': route, 'body': body, 'compressGzip': compressGzip};
   };
 
   var copyArray = function(dest, doffset, src, soffset, length) {
@@ -290,13 +327,17 @@
     return len;
   };
 
-  var encodeMsgFlag = function(type, compressRoute, buffer, offset) {
+  var encodeMsgFlag = function(type, compressRoute, buffer, offset, compressGzip) {
     if(type !== Message.TYPE_REQUEST && type !== Message.TYPE_NOTIFY &&
        type !== Message.TYPE_RESPONSE && type !== Message.TYPE_PUSH) {
       throw new Error('unkonw message type: ' + type);
     }
 
     buffer[offset] = (type << 1) | (compressRoute ? 1 : 0);
+
+    if(compressGzip) {
+      buffer[offset] = buffer[offset] | MSG_COMPRESS_GZIP_ENCODE_MASK;
+    }
 
     return offset + MSG_FLAG_BYTES;
   };
@@ -345,5 +386,7 @@
 
   if(typeof(window) != "undefined") {
     window.Protocol = Protocol;
+  } else {
+    module.exports = Protocol;
   }
 })(typeof(window)=="undefined" ? module.exports : (this.Protocol = {}),typeof(window)=="undefined"  ? Buffer : Uint8Array, this);
