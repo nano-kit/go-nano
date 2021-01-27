@@ -52,7 +52,7 @@ var (
 // parameter.
 type Session struct {
 	sync.RWMutex                        // protect data
-	id           int64                  // session global unique id
+	id           service.SID            // session global unique id
 	uid          int64                  // binding user id
 	lastTime     int64                  // last heartbeat time
 	entity       NetworkEntity          // low-level network entity
@@ -73,7 +73,7 @@ func New(entity NetworkEntity) *Session {
 }
 
 // NewWith returns a new session instance with a known ID
-func NewWith(id int64, entity NetworkEntity) *Session {
+func NewWith(id service.SID, entity NetworkEntity) *Session {
 	return &Session{
 		id:       id,
 		entity:   entity,
@@ -115,7 +115,7 @@ func (s *Session) ResponseMID(mid uint64, v interface{}) error {
 }
 
 // ID returns the session id
-func (s *Session) ID() int64 {
+func (s *Session) ID() service.SID {
 	return s.id
 }
 

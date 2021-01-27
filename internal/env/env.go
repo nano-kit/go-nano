@@ -32,6 +32,7 @@ import (
 
 var (
 	Wd                 string             // working path
+	GateID             uint16             // gate id
 	Die                chan bool          // wait for end application
 	Heartbeat          time.Duration      // Heartbeat internal
 	Debug              bool               // enable Debug

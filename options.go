@@ -42,6 +42,13 @@ func WithGateAddr(addr string) Option {
 	}
 }
 
+// WithGateID sets the gate server ID, which by default is 0.
+func WithGateID(index uint16) Option {
+	return func(_ *cluster.Options) {
+		env.GateID = index
+	}
+}
+
 // WithMaster sets the option to indicate whether the current node is master node
 func WithMaster() Option {
 	return func(opt *cluster.Options) {

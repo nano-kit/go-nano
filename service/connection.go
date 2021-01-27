@@ -21,43 +21,44 @@
 package service
 
 import (
+	"strconv"
 	"sync/atomic"
+
+	"github.com/nano-kit/go-nano/internal/env"
+)
+
+const (
+	// reserve high 32 bits for gate id
+	sessionIDMask = 0xffffffff
+	gateIDShift   = 32
 )
 
 // Connections is a global variable which is used by session.
 var Connections = newConnectionService()
 
+type SID int64
+
+func (s SID) String() string {
+	gate := int64(s >> gateIDShift)
+	session := int64(s & sessionIDMask)
+	str := strconv.FormatInt(session, 10)
+	if gate == 0 {
+		return str
+	}
+	return strconv.FormatInt(gate, 10) + "_" + str
+}
+
 type connectionService struct {
-	count int64
-	sid   int64
+	sid uint32
 }
 
 func newConnectionService() *connectionService {
 	return &connectionService{sid: 0}
 }
 
-// Increment increment the connection count
-func (c *connectionService) Increment() {
-	atomic.AddInt64(&c.count, 1)
-}
-
-// Decrement decrement the connection count
-func (c *connectionService) Decrement() {
-	atomic.AddInt64(&c.count, -1)
-}
-
-// Count returns the connection numbers in current
-func (c *connectionService) Count() int64 {
-	return atomic.LoadInt64(&c.count)
-}
-
-// Reset reset the connection service status
-func (c *connectionService) Reset() {
-	atomic.StoreInt64(&c.count, 0)
-	atomic.StoreInt64(&c.sid, 0)
-}
-
 // SessionID returns the session id
-func (c *connectionService) SessionID() int64 {
-	return atomic.AddInt64(&c.sid, 1)
+func (c *connectionService) SessionID() SID {
+	s := SID(atomic.AddUint32(&c.sid, 1))
+	g := SID(env.GateID) << gateIDShift
+	return g | s
 }

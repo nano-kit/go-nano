@@ -353,7 +353,7 @@ func (a *agent) writeMessageWS(m *message.Message) error {
 
 func (a *agent) notifySessionClosed(rpcClient *rpcClient, members []string) {
 	request := &clusterpb.SessionClosedRequest{
-		SessionId: a.session.ID(),
+		SessionId: int64(a.session.ID()),
 	}
 
 	for _, remote := range members {

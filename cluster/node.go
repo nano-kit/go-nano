@@ -37,6 +37,7 @@ import (
 	"github.com/nano-kit/go-nano/internal/message"
 	"github.com/nano-kit/go-nano/pipeline"
 	"github.com/nano-kit/go-nano/scheduler"
+	"github.com/nano-kit/go-nano/service"
 	"github.com/nano-kit/go-nano/session"
 	"golang.org/x/sys/unix"
 	"google.golang.org/grpc"
@@ -90,7 +91,7 @@ type Node struct {
 	rpcClient *rpcClient
 
 	mu       sync.RWMutex
-	sessions map[int64]*session.Session
+	sessions map[service.SID]*session.Session
 }
 
 func validateListenAddrWithExplicitPort(addr string) error {
@@ -118,7 +119,7 @@ func (n *Node) Startup() error {
 		return fmt.Errorf("invalid node service address: %v", err)
 	}
 
-	n.sessions = map[int64]*session.Session{}
+	n.sessions = map[service.SID]*session.Session{}
 	n.cluster = newCluster(n)
 	n.handler = NewHandler(n, n.Pipeline)
 	components := n.Components.List()
@@ -419,14 +420,14 @@ func (n *Node) removeSession(s *session.Session) {
 	n.mu.Unlock()
 }
 
-func (n *Node) findSession(sid int64) *session.Session {
+func (n *Node) findSession(sid service.SID) *session.Session {
 	n.mu.RLock()
 	s := n.sessions[sid]
 	n.mu.RUnlock()
 	return s
 }
 
-func (n *Node) findOrCreateSession(sid int64, gateAddr string) (*session.Session, error) {
+func (n *Node) findOrCreateSession(sid service.SID, gateAddr string) (*session.Session, error) {
 	n.mu.RLock()
 	s, found := n.sessions[sid]
 	n.mu.RUnlock()
@@ -456,7 +457,7 @@ func (n *Node) HandleRequest(_ context.Context, req *clusterpb.RequestMessage) (
 	if !found {
 		return nil, fmt.Errorf("service not found in current node: %v", req.Route)
 	}
-	s, err := n.findOrCreateSession(req.SessionId, req.GateAddr)
+	s, err := n.findOrCreateSession(service.SID(req.SessionId), req.GateAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -477,7 +478,7 @@ func (n *Node) HandleNotify(_ context.Context, req *clusterpb.NotifyMessage) (*c
 	if !found {
 		return nil, fmt.Errorf("service not found in current node: %v", req.Route)
 	}
-	s, err := n.findOrCreateSession(req.SessionId, req.GateAddr)
+	s, err := n.findOrCreateSession(service.SID(req.SessionId), req.GateAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -493,7 +494,7 @@ func (n *Node) HandleNotify(_ context.Context, req *clusterpb.NotifyMessage) (*c
 
 // HandlePush implements the MemberServer interface
 func (n *Node) HandlePush(_ context.Context, req *clusterpb.PushMessage) (*clusterpb.MemberHandleResponse, error) {
-	s := n.findSession(req.SessionId)
+	s := n.findSession(service.SID(req.SessionId))
 	if s == nil {
 		return &clusterpb.MemberHandleResponse{}, fmt.Errorf("session not found: %v", req.SessionId)
 	}
@@ -502,7 +503,7 @@ func (n *Node) HandlePush(_ context.Context, req *clusterpb.PushMessage) (*clust
 
 // HandleResponse implements the MemberServer interface
 func (n *Node) HandleResponse(_ context.Context, req *clusterpb.ResponseMessage) (*clusterpb.MemberHandleResponse, error) {
-	s := n.findSession(req.SessionId)
+	s := n.findSession(service.SID(req.SessionId))
 	if s == nil {
 		return &clusterpb.MemberHandleResponse{}, fmt.Errorf("session not found: %v", req.SessionId)
 	}
@@ -525,9 +526,10 @@ func (n *Node) DelMember(_ context.Context, req *clusterpb.DelMemberRequest) (*c
 
 // SessionClosed implements the MemberServer interface
 func (n *Node) SessionClosed(_ context.Context, req *clusterpb.SessionClosedRequest) (*clusterpb.SessionClosedResponse, error) {
+	sid := service.SID(req.SessionId)
 	n.mu.Lock()
-	s, found := n.sessions[req.SessionId]
-	delete(n.sessions, req.SessionId)
+	s, found := n.sessions[sid]
+	delete(n.sessions, sid)
 	n.mu.Unlock()
 	if found {
 		scheduler.Run(func() { session.Lifetime.Close(s) })
@@ -537,9 +539,10 @@ func (n *Node) SessionClosed(_ context.Context, req *clusterpb.SessionClosedRequ
 
 // CloseSession implements the MemberServer interface
 func (n *Node) CloseSession(_ context.Context, req *clusterpb.CloseSessionRequest) (*clusterpb.CloseSessionResponse, error) {
+	sid := service.SID(req.SessionId)
 	n.mu.Lock()
-	s, found := n.sessions[req.SessionId]
-	delete(n.sessions, req.SessionId)
+	s, found := n.sessions[sid]
+	delete(n.sessions, sid)
 	n.mu.Unlock()
 	if found {
 		s.Close()

@@ -384,7 +384,7 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 	case message.Request:
 		request := &clusterpb.RequestMessage{
 			GateAddr:  gateAddr,
-			SessionId: sessionID,
+			SessionId: int64(sessionID),
 			Id:        msg.ID,
 			Route:     msg.Route,
 			Data:      data,
@@ -393,7 +393,7 @@ func (h *LocalHandler) remoteProcess(session *session.Session, msg *message.Mess
 	case message.Notify:
 		request := &clusterpb.NotifyMessage{
 			GateAddr:  gateAddr,
-			SessionId: sessionID,
+			SessionId: int64(sessionID),
 			Route:     msg.Route,
 			Data:      data,
 		}

@@ -6,11 +6,12 @@ import (
 
 	"github.com/nano-kit/go-nano/cluster/clusterpb"
 	"github.com/nano-kit/go-nano/internal/message"
+	"github.com/nano-kit/go-nano/service"
 	"github.com/nano-kit/go-nano/session"
 )
 
 type acceptor struct {
-	sid        int64
+	sid        service.SID
 	gateClient clusterpb.MemberClient
 	session    *session.Session
 	lastMid    uint64
@@ -26,7 +27,7 @@ func (a *acceptor) Push(route string, v interface{}) error {
 		return err
 	}
 	request := &clusterpb.PushMessage{
-		SessionId: a.sid,
+		SessionId: int64(a.sid),
 		Route:     route,
 		Data:      data,
 	}
@@ -68,7 +69,7 @@ func (a *acceptor) ResponseMid(mid uint64, v interface{}) error {
 		return err
 	}
 	request := &clusterpb.ResponseMessage{
-		SessionId: a.sid,
+		SessionId: int64(a.sid),
 		Id:        mid,
 		Data:      data,
 	}
@@ -80,7 +81,7 @@ func (a *acceptor) ResponseMid(mid uint64, v interface{}) error {
 func (a *acceptor) Close() error {
 	// TODO: buffer
 	request := &clusterpb.CloseSessionRequest{
-		SessionId: a.sid,
+		SessionId: int64(a.sid),
 	}
 	_, err := a.gateClient.CloseSession(context.Background(), request)
 	return err

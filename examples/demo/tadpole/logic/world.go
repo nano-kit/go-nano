@@ -27,7 +27,7 @@ func NewWorld() *World {
 func (w *World) Init() {
 	session.Lifetime.OnClosed(func(s *session.Session) {
 		w.Leave(s)
-		w.Broadcast("leave", &protocol.LeaveWorldResponse{ID: s.ID()})
+		w.Broadcast("leave", &protocol.LeaveWorldResponse{ID: int64(s.ID())})
 		log.Printf("session count: %d", w.Count())
 	})
 }
@@ -36,7 +36,7 @@ func (w *World) Init() {
 func (w *World) Enter(s *session.Session, msg []byte) error {
 	w.Add(s)
 	log.Printf("session count: %d", w.Count())
-	return s.Response(&protocol.EnterWorldResponse{ID: s.ID()})
+	return s.Response(&protocol.EnterWorldResponse{ID: int64(s.ID())})
 }
 
 // Update refresh tadpole's position
@@ -46,6 +46,6 @@ func (w *World) Update(s *session.Session, msg []byte) error {
 
 // Message handler was used to communicate with each other
 func (w *World) Message(s *session.Session, msg *protocol.WorldMessage) error {
-	msg.ID = s.ID()
+	msg.ID = int64(s.ID())
 	return w.Broadcast("message", msg)
 }

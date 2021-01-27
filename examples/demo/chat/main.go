@@ -114,8 +114,8 @@ func (mgr *RoomManager) Join(s *session.Session, msg []byte) error {
 		mgr.rooms[testRoomID] = room
 	}
 
-	fakeUID := s.ID() //just use s.ID as uid !!!
-	s.Bind(fakeUID)   // binding session uids.Set(roomIDKey, room)
+	fakeUID := int64(s.ID()) //just use s.ID as uid !!!
+	s.Bind(fakeUID)          // binding session uids.Set(roomIDKey, room)
 	s.Set(roomIDKey, room)
 	s.Push("onMembers", &AllMembers{Members: room.group.Members()})
 	// notify others
