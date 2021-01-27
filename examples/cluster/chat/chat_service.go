@@ -3,6 +3,7 @@ package chat
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/nano-kit/go-nano"
 	"github.com/nano-kit/go-nano/component"
@@ -23,7 +24,8 @@ func newRoomService() *RoomService {
 }
 
 func (rs *RoomService) JoinRoom(s *session.Session, msg *protocol.JoinRoomRequest) error {
-	if err := s.Bind(msg.MasterUID); err != nil {
+	uid := strconv.FormatInt(msg.MasterUID, 10)
+	if err := s.Bind(uid); err != nil {
 		return errors.Trace(err)
 	}
 
@@ -42,8 +44,10 @@ type SyncMessage struct {
 }
 
 func (rs *RoomService) SyncMessage(s *session.Session, msg *SyncMessage) error {
+	uid, _ := strconv.ParseInt(s.UID(), 10, 64)
+
 	// Send an Notify to master server to stats
-	if err := s.Notify("TopicService.Stats", &protocol.MasterStats{UID: s.UID()}); err != nil {
+	if err := s.Notify("TopicService.Stats", &protocol.MasterStats{UID: uid}); err != nil {
 		return errors.Trace(err)
 	}
 

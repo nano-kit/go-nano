@@ -2,6 +2,7 @@ package master
 
 import (
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/nano-kit/go-nano/component"
@@ -38,7 +39,8 @@ type ExistsMembersResponse struct {
 func (ts *TopicService) NewUser(s *session.Session, msg *protocol.NewUserRequest) error {
 	ts.nextUID++
 	uid := ts.nextUID
-	if err := s.Bind(uid); err != nil {
+	uidstr := strconv.FormatInt(uid, 10)
+	if err := s.Bind(uidstr); err != nil {
 		return errors.Trace(err)
 	}
 
@@ -85,6 +87,7 @@ func (ts *TopicService) Stats(s *session.Session, msg *protocol.MasterStats) err
 
 func (ts *TopicService) userDisconnected(s *session.Session) {
 	uid := s.UID()
-	delete(ts.users, uid)
+	uidint, _ := strconv.ParseInt(uid, 10, 64)
+	delete(ts.users, uidint)
 	log.Println("User session disconnected", s.UID())
 }

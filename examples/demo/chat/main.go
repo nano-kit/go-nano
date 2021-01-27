@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -38,7 +39,7 @@ type (
 
 	// AllMembers contains all members uid
 	AllMembers struct {
-		Members []int64 `json:"members"`
+		Members []string `json:"members"`
 	}
 
 	// JoinResponse represents the result of joining room
@@ -114,8 +115,8 @@ func (mgr *RoomManager) Join(s *session.Session, msg []byte) error {
 		mgr.rooms[testRoomID] = room
 	}
 
-	fakeUID := int64(s.ID()) //just use s.ID as uid !!!
-	s.Bind(fakeUID)          // binding session uids.Set(roomIDKey, room)
+	fakeUID := strconv.FormatInt(int64(s.ID()), 10) //just use s.ID as uid !!!
+	s.Bind(fakeUID)                                 // binding session uids.Set(roomIDKey, room)
 	s.Set(roomIDKey, room)
 	s.Push("onMembers", &AllMembers{Members: room.group.Members()})
 	// notify others

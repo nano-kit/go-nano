@@ -2,6 +2,7 @@ package nano
 
 import (
 	"math/rand"
+	"strconv"
 	"testing"
 
 	"github.com/nano-kit/go-nano/session"
@@ -15,7 +16,8 @@ func TestChannel_Add(t *testing.T) {
 	for i := 0; i < paraCount; i++ {
 		go func(id int) {
 			s := session.New(nil)
-			s.Bind(int64(id + 1))
+			uid := strconv.FormatInt(int64(id+1), 10)
+			s.Bind(uid)
 			c.Add(s)
 			w <- true
 		}(i)
@@ -29,8 +31,9 @@ func TestChannel_Add(t *testing.T) {
 		t.Fatalf("count expect: %d, got: %d", paraCount, c.Count())
 	}
 
-	n := rand.Int63n(int64(paraCount) + 1)
-	if !c.Contains(n) {
+	n := rand.Int63n(int64(paraCount)) + 1
+	randUID := strconv.FormatInt(n, 10)
+	if !c.Contains(randUID) {
 		t.Fail()
 	}
 

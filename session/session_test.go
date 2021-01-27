@@ -1,6 +1,8 @@
 package session
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestNewSession(t *testing.T) {
 	s := New(nil)
@@ -11,7 +13,7 @@ func TestNewSession(t *testing.T) {
 
 func TestSession_Bind(t *testing.T) {
 	s := New(nil)
-	uids := []int64{100, 1000, 10000000}
+	uids := []string{"100", "1000", "10000000"}
 	for i, uid := range uids {
 		s.Bind(uid)
 		if s.UID() != uids[i] {

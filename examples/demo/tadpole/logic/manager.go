@@ -2,6 +2,7 @@ package logic
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/nano-kit/go-nano/component"
 	"github.com/nano-kit/go-nano/examples/demo/tadpole/logic/protocol"
@@ -22,7 +23,8 @@ func NewManager() *Manager {
 func (m *Manager) Login(s *session.Session, msg *protocol.JoyLoginRequest) error {
 	log.Println(msg)
 	id := int64(s.ID())
-	s.Bind(id)
+	uid := strconv.FormatInt(id, 10)
+	s.Bind(uid)
 	return s.Response(protocol.LoginResponse{
 		Status: protocol.LoginStatusSucc,
 		ID:     id,
